@@ -72,3 +72,4 @@ def run_tourist_spots():
     selected_country = st.session_state.get("selected_country")
     info = st.session_state.get("info", {})  # 기본값 빈 딕셔너리
     expected_visitors = st.session_state.get("expected_visitors", "미정")
+    st.title("🌍 관광지 정보 조회")

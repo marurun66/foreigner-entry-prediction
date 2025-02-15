@@ -78,11 +78,21 @@ def run_seasons():
     else:        
         # ✅ 연도 및 월 선택
         col1, col2 = st.columns([1, 1])
+
         with col1:
-            year = st.selectbox("연도", [2025, 2026], key="year", index=[2025, 2026].index(st.session_state.get("year", 2025)) if "year" in st.session_state else None, placeholder="연도를 선택하세요")
+            # 이전 페이지에서 선택한 값이 있으면 유지, 없으면 기본값 2025
+            default_year = st.session_state.get("year", 2025)
+            year_options = [2025, 2026]
+            year_index = year_options.index(default_year) if default_year in year_options else 0  # 존재하는 값인지 체크
+            year = st.selectbox("연도", year_options, key="year", index=year_index, placeholder="연도를 선택하세요")
+
         with col2:
-            month = st.selectbox("월", list(range(1, 13)), key="month", index=list(range(1, 13)).index(st.session_state.get("month", 1)) if "month" in st.session_state else None, placeholder="월을 선택하세요")
-        
+            # 이전 페이지에서 선택한 값이 있으면 유지, 없으면 기본값 1월
+            default_month = st.session_state.get("month", 1)
+            month_list = list(range(1, 13))
+            month_index = month_list.index(default_month) if default_month in month_list else 0  # 존재하는 값인지 체크
+            month = st.selectbox("월", month_list, key="month", index=month_index, placeholder="월을 선택하세요")
+
         if year is None or month is None:
             st.warning("""
             📅 **여행 날짜와 🌎 대상 국가를 아직 선택하지 않으셨네요!**  
@@ -157,4 +167,3 @@ def run_seasons():
                         st.session_state.selected_travel = travel["여행지명"]
                         st.session_state.selected_location = user_input_address  # ✅ 유저 입력 반영
                         st.success(f"✅ {travel['여행지명']}을(를) 참고해서 여행코스 준비 시작하겠습니다. (주소: {user_input_address})")
-

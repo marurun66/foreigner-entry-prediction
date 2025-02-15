@@ -21,53 +21,63 @@ if "current_page" not in st.session_state:
 if "next_page" not in st.session_state:
     st.session_state["next_page"] = None  # ✅ 초기화
 
-# ✅ 세션 상태가 변경되었을 경우 먼저 처리 (가장 먼저 실행)
-if st.session_state["next_page"] is not None:
+# ✅ next_page 감지 후 즉시 반영
+if st.session_state.get("next_page") is not None:
     st.session_state["current_page"] = st.session_state["next_page"]
     st.session_state["next_page"] = None  # ✅ 한 번 반영 후 초기화
+    st.toast(f"페이지 변경됨: {st.session_state['current_page']}")  # ✅ 알림 메시지
     st.rerun()  # ✅ 즉시 새로고침하여 반영
 
+# ✅ 디버깅 정보 출력
+st.write("🔍 **[디버그 정보]**")
+st.write(f"현재 페이지: {st.session_state.get('current_page')}")
+print(f"📌 디버그: 현재 페이지: {st.session_state.get('current_page')}")
+
 def main():
-    menu = ["Home", "Country", "Festival", "Seasons", "TouristSpot", "About", "Ask"]
+    menu = {
+        "Home": "🏠 홈",
+        "Country": "🌍 국가별 입국 예측",
+        "Festival": "🎉 축제 정보",
+        "Seasons": "🍂 계절별 여행지",
+        "TouristSpot": "📍 관광지 추천",
+        "About": "ℹ️ 정보",
+        "Ask": "💡 문의하기"
+    }
 
     with st.sidebar:
-        # ✅ default_index를 session_state["current_page"] 값과 동기화
-        default_index = menu.index(st.session_state["current_page"]) if st.session_state["current_page"] in menu else 0
-        choice = option_menu("Menu", menu,
-                            icons=['house', 'kanban', 'bi bi-robot', 'bi bi-airplane', 'bi bi-binoculars'],
-                            menu_icon="app-indicator",
-                            default_index=default_index,
-                            styles={
-                                "container": {"padding": "4!important", "background-color": "#fafafa"},
-                                "icon": {"color": "black", "font-size": "25px"},
-                                "nav-link": {"font-size": "16px", "text-align": "left", "margin": "0px", "--hover-color": "#fafafa"},
-                                "nav-link-selected": {"background-color": "#08c7b4"},
-                            })
+        default_index = list(menu.keys()).index(st.session_state["current_page"]) if st.session_state["current_page"] in menu else 0
+        choice = option_menu(
+            "Menu", list(menu.keys()),
+            icons=['house', 'globe', 'calendar-event', 'cloud-sun', 'binoculars', 'info-circle', 'question-circle'],
+            menu_icon="app-indicator",
+            default_index=default_index,
+            styles={
+                "container": {"padding": "4!important", "background-color": "#fafafa"},
+                "icon": {"color": "black", "font-size": "25px"},
+                "nav-link": {"font-size": "16px", "text-align": "left", "margin": "0px", "--hover-color": "#fafafa"},
+                "nav-link-selected": {"background-color": "#08c7b4"},
+            }
+        )
 
     # ✅ 선택한 메뉴와 session_state["current_page"]를 동기화
     if choice != st.session_state["current_page"]:
-        print(f"🌍 현재 선택된 페이지 변경됨: {st.session_state['current_page']} → {choice}")  
-        st.session_state["current_page"] = choice
-        st.rerun()  # ✅ 즉시 새로고침
+        st.session_state["next_page"] = choice
+        print(f"🌍 메뉴에서 선택한 페이지: {choice}")  # ✅ 터미널 디버깅
+        st.rerun()  # ✅ 즉시 새로고침하여 반영
 
-    # ✅ 현재 페이지 상태 디버깅 출력
-    st.write(f"🌍 현재 페이지: {st.session_state['current_page']}")  
+    # ✅ 페이지 실행 함수 매핑
+    page_mapping = {
+        "Home": run_home,
+        "Country": run_country,
+        "Festival": run_festival,
+        "Seasons": run_seasons,
+        "TouristSpot": run_tourist_spots,
+        "About": run_about,
+        "Ask": run_ask
+    }
 
-    # ✅ 세션 상태에 따라 페이지 실행
-    if st.session_state["current_page"] == menu[0]:
-        run_home()
-    elif st.session_state["current_page"] == menu[1]:
-        run_country()
-    elif st.session_state["current_page"] == menu[2]:
-        run_festival()
-    elif st.session_state["current_page"] == menu[3]:
-        run_seasons()   
-    elif st.session_state["current_page"] == menu[4]:
-        run_tourist_spots()
-    elif st.session_state["current_page"] == menu[5]:
-        run_about()
-    elif st.session_state["current_page"] == menu[6]:
-        run_ask()
+    # ✅ 현재 페이지 실행
+    page_mapping[st.session_state["current_page"]]() 
 
 if __name__ == '__main__':
     main()

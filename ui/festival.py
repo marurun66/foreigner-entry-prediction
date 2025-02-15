@@ -143,12 +143,11 @@ def run_festival():
                     st.warning("❌ 여행지를 선택하지 않았습니다. **Country** 메뉴에서 여행지를 선택해주세요.")
 
                 # ✅ 축제 선택 버튼 추가
-                else :
-                    st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기 시작하기", key=f"btn_{idx}")
-                    st.session_state["selected_festival"] = festival["축제명"]
-                    st.session_state["selected_location"] = festival["위치"]
-                    st.session_state["current_page"] = "TouristSpot"  # ✅ 페이지 상태 변경
-                    st.write(f"🔄 페이지 변경됨: {st.session_state['current_page']}")  # 디버깅용 출력
-                    st.rerun()  # ✅ 페이지 새로고침하여 `run_festival()` 실행
+                else:
+                    if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기 시작하기", key=f"btn_{idx}"):
+                        st.session_state["current_page"] = "TouristSpot"  # ✅ 페이지 상태 변경
+                        st.write(f"🔄 페이지 변경됨: {st.session_state['current_page']}")  # 디버깅용 출력
+                        st.rerun() 
+
 
 
