@@ -27,9 +27,9 @@ def run_country():
     col1, col2 = st.columns([1, 1])  # 1:1 비율로 배치
     # 한 줄에 연도 & 월 선택
     with col1:
-        year = st.selectbox("연도", [2025, 2026], key="year")  # 연도 선택
+        year = st.selectbox("연도", [2025, 2026], key="year", placeholder="연도를 선택하세요")  # 연도 선택
     with col2:
-        month = st.selectbox("월", list(range(1, 13)), key="month")  # 월 선택
+        month = st.selectbox("월", list(range(1, 13)), key="month",placeholder="월을 선택하세요")  # 월 선택
     
 ######
     # 🍎 지도로 해당 년월의 각국 예상 입국인원을 봅니다.

@@ -144,10 +144,17 @@ def run_festival():
 
                 # ✅ 축제 선택 버튼 추가
                 else:
-                    if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기 시작하기", key=f"btn_{idx}"):
-                        st.session_state["current_page"] = "TouristSpot"  # ✅ 페이지 상태 변경
-                        st.write(f"🔄 페이지 변경됨: {st.session_state['current_page']}")  # 디버깅용 출력
-                        st.rerun() 
+                    if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기", key=f"btn_{idx}"):
+                        st.session_state["next_page"] = "TouristSpot"  # ✅ 다음 페이지로 설정
+                        st.session_state["force_rerun"] = True  # ✅ 강제 새로고침 플래그 추가
 
+                        # ✅ 디버깅 출력 (UI 및 터미널)
+                        st.write("🔍 **[DEBUG] 버튼 클릭됨!**")
+                        st.write(f"현재 페이지: {st.session_state.get('current_page')}")
+                        st.write(f"다음 페이지: {st.session_state.get('next_page')}")
+                        print("✅ [DEBUG] 버튼 클릭됨! next_page 설정됨.")
+                        print(f"📌 [DEBUG] next_page → {st.session_state.get('next_page')}")
+                        
+                        st.rerun()  # ✅ 페이지 리로드 
 
 

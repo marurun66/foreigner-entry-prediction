@@ -20,13 +20,21 @@ if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Home"
 if "next_page" not in st.session_state:
     st.session_state["next_page"] = None  # ✅ 초기화
+if "force_rerun" not in st.session_state:
+    st.session_state["force_rerun"] = False  # ✅ 강제 새로고침 플래그 초기화
 
 # ✅ next_page 감지 후 즉시 반영
 if st.session_state.get("next_page") is not None:
     st.session_state["current_page"] = st.session_state["next_page"]
-    st.session_state["next_page"] = None  # ✅ 한 번 반영 후 초기화
-    st.toast(f"페이지 변경됨: {st.session_state['current_page']}")  # ✅ 알림 메시지
-    st.rerun()  # ✅ 즉시 새로고침하여 반영
+    st.session_state["next_page"] = None  # ✅ `next_page` 초기화
+    st.session_state["force_rerun"] = True  # ✅ 강제 새로고침 플래그 설정
+    st.rerun()
+
+# ✅ force_rerun이 설정되었으면 강제 새로고침 실행
+if st.session_state.get("force_rerun"):
+    st.session_state["force_rerun"] = False
+    print("📌 [DEBUG] 강제 새로고침 실행!")
+    st.rerun()
 
 # ✅ 디버깅 정보 출력
 st.write("🔍 **[디버그 정보]**")
@@ -35,13 +43,13 @@ print(f"📌 디버그: 현재 페이지: {st.session_state.get('current_page')}
 
 def main():
     menu = {
-        "Home": "🏠 홈",
-        "Country": "🌍 국가별 입국 예측",
-        "Festival": "🎉 축제 정보",
-        "Seasons": "🍂 계절별 여행지",
-        "TouristSpot": "📍 관광지 추천",
-        "About": "ℹ️ 정보",
-        "Ask": "💡 문의하기"
+        "Home": "홈",
+        "Country": "국가별 입국 예측",
+        "Festival": "축제 정보",
+        "Seasons": "계절별 여행지",
+        "TouristSpot": "관광지 추천",
+        "About": "정보",
+        "Ask": "문의"
     }
 
     with st.sidebar:

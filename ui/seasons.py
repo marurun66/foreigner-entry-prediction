@@ -80,33 +80,39 @@ def run_seasons():
         col1, col2 = st.columns([1, 1])
 
         with col1:
-            # 이전 페이지에서 선택한 값이 있으면 유지, 없으면 기본값 2025
-            default_year = st.session_state.get("year", 2025)
+            # ✅ 이전 페이지에서 선택한 값이 있으면 유지, 없으면 `None`
+            default_year = st.session_state.get("year")
             year_options = [2025, 2026]
-            year_index = year_options.index(default_year) if default_year in year_options else 0  # 존재하는 값인지 체크
+
+            # ✅ 이전 값이 있으면 해당 값으로 선택, 없으면 `index=None` (초기 상태)
+            year_index = year_options.index(default_year) if default_year in year_options else None
             year = st.selectbox("연도", year_options, key="year", index=year_index, placeholder="연도를 선택하세요")
 
         with col2:
-            # 이전 페이지에서 선택한 값이 있으면 유지, 없으면 기본값 1월
-            default_month = st.session_state.get("month", 1)
+            # ✅ 이전 페이지에서 선택한 값이 있으면 유지, 없으면 `None`
+            default_month = st.session_state.get("month")
             month_list = list(range(1, 13))
-            month_index = month_list.index(default_month) if default_month in month_list else 0  # 존재하는 값인지 체크
+
+            # ✅ 이전 값이 있으면 해당 값으로 선택, 없으면 `index=None` (초기 상태)
+            month_index = month_list.index(default_month) if default_month in month_list else None
             month = st.selectbox("월", month_list, key="month", index=month_index, placeholder="월을 선택하세요")
 
+        # ✅ 입력값이 없는 경우 경고 메시지 출력
         if year is None or month is None:
             st.warning("""
             📅 **여행 날짜와 🌎 대상 국가를 아직 선택하지 않으셨네요!**  
             **[Country]** 메뉴에서 15개국의 예상 입국 인원을 비교하고, **어느 국가**의 여행객을 위한 패키지를 구상할지 선택 해보세요. 😉  
             만약 **계절별 여행 정보를 먼저 확인하고 싶다면, 여행 날짜를 선택**해 주세요! 🎉  
             """)
-        
+            
             return
+
 ##################
 
     
     season = get_season(month)  # ✅ 계절 결정
     st.write(f"""📅 선택한 날짜: {year}년 {month}월 (계절: {season})  
-             축제 등의 정보는 **정확한 날짜를 한번 더 확인**하세요.""")
+             정보는 **정확한 날짜를 한번 더 확인**하세요.""")
     
     params = {
         "serviceKey": data_go_API_KEY,
