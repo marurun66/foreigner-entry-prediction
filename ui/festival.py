@@ -149,12 +149,13 @@ def run_festival():
 
             else :
                 if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기"):
-                    st.session_state["selected_festival"] = festival["축제명"]
+                    st.session_state["selected_travel"] = festival["축제명"]
                     st.session_state["selected_location"] = festival["위치"]
                     st.write(f"선택국가: {selected_country}")
                     st.write(f"선택한 축제: {festival['축제명']}")
                     st.write(f"선택한 위치: {festival['위치']}")
                     navigate_to("TouristSpot")
+
 
         # ✅ 축제 데이터가 없을 경우 처리
     if len(festival_list) == 0:

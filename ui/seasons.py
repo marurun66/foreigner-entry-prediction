@@ -170,7 +170,7 @@ def run_seasons():
                         )
                     else:
                         user_input_address = travel["위치"]  # 주소가 있으면 기존 값 사용
-#####
+#####               
                     if selected_country is None:
                         st.warning("❌ 대상 국가를 선택하지 않았습니다. **Country** 메뉴에서 먼저 대상 국가를 선택해주세요.")
 
