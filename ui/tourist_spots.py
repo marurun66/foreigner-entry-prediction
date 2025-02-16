@@ -8,38 +8,55 @@ KAKAO_API_KEY = st.secrets["KAKAO_API_KEY"]
 KAKAO_JS_KEY = st.secrets["KAKAO_JS_KEY"]
 data_go_API_KEY = st.secrets["data_go_API_KEY"]
 
+import re
+
+
 def extract_region(address):
     """
     주소에서 '도 + 시/군' 또는 '광역시' 정보를 추출하는 함수
-    - '세종특별자치시 전동면 신송로 217' → ('세종특별자치시', '')
-    - '경기도 가평군 청평면' → ('경기도', '가평군')
-    - '서울특별시 강남구 역삼동' → ('서울특별시', '강남구') ✅ (서울특별시는 구 정보 포함)
-    - '대구광역시 중구 동성로2길 80 (공평동)' → ('대구광역시', '')
-    - '경기도 수원시 팔달구' → ('경기도', '수원시')
+    - '전북특별자치도 고창군 공음면 청천길 41-27' → ('전라북도', '고창군')
+    - '서울특별시 중구 을지로 281 (을지로7가)' → ('서울특별시', '중구')
+    - '경기도 수원시 영통구 영통동' → ('경기도', '수원시')
+    - '김천시' → ('', '김천시')
     """
 
+    # ✅ "특별자치도" → 기존 명칭으로 변환
+    special_district_map = {
+        "전북특별자치도": "전라북도",
+        "강원특별자치도": "강원도"
+    }
+    
+    # ✅ 정규식 패턴 (특별자치도 포함)
     pattern = re.compile(
-        r"(서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시|제주특별자치도|경기도|강원특별자치도|충청북도|충청남도|전라북도|전라남도|경상북도|경상남도)"
-        r"(?:\s+(\S+시|\S+군|\S+구))?"
+        r"^(?:(서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시|제주특별자치도|"
+        r"전북특별자치도|강원특별자치도|경기도|충청북도|충청남도|전라북도|전라남도|경상북도|경상남도)\s*)?"
+        r"(\S+시|\S+군|\S+구)?"
     )
 
     match = pattern.search(address)
     print(f"📌 [DEBUG] 주소 입력: {address}, 매치 결과: {match}")
 
     if match:
-        province = match.group(1)  # 도·광역시·특별시
+        province = match.group(1) if match.group(1) else ""  # 도·광역시·특별시
         city_or_district = match.group(2) if match.group(2) else ""  # 시·군·구
 
-        # ✅ 서울특별시는 '구' 정보만 반환 (예: '강남구')
+        # ✅ 특별자치도 변환 적용
+        if province in special_district_map:
+            province = special_district_map[province]
+
+        # ✅ 서울특별시는 '구' 정보까지만 반환
         if province == "서울특별시":
             return province, city_or_district
-        
-        
-        # ✅ 나머지 지역은 '시' 또는 '군'까지만 반환
-        return province, city_or_district if "시" in city_or_district or "군" in city_or_district else ""
 
+        # ✅ 도가 없는 경우 → 유저가 "경주시"만 입력한 경우, 그대로 반환
+        if not province and city_or_district:
+            return "", city_or_district
+        
+        # ✅ 기본적으로 '도 + 시/군' 반환 (구 이하 정보는 제외)
+        return province, city_or_district if city_or_district else ""
 
     return None, None
+
 
 def get_coordinates_from_address(address):
     """
@@ -233,7 +250,7 @@ def run_tourist_spots():
             테마 지역: {selected_location}""")
 
     # 🔹 위치 정보가 없을 경우 → 경고 메시지 출력 후 종료
-    if not province :
+    if not province and not city:
         st.warning("❌ 올바른 여행 지역 정보가 없습니다. Festival, Seasons 메뉴에서 테마를 선택하면 해당 지역 관광지를 알려드립니다.")
         return
     if not year :

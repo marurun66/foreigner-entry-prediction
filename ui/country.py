@@ -92,7 +92,8 @@ def run_country():
             .rename_axis("순위")  # 인덱스 이름 설정
             .reset_index()
             .assign(순위=lambda df: df.index + 1),  # 순위 1부터 시작
-            hide_index=True  # Streamlit에서 인덱스 숨기기
+            hide_index=True,  # Streamlit에서 인덱스 숨기기
+            use_container_width=True
         )
     with col2:
         st.write("방문자 수가 50k 이상 예상되는 국가")
@@ -103,7 +104,8 @@ def run_country():
             .rename_axis("순위")  # 인덱스 이름 설정
             .reset_index()
             .assign(순위=lambda df: df.index + 1),  # 순위 1부터 시작
-            hide_index=True  # Streamlit에서 인덱스 숨기기 (최신 버전)
+            hide_index=True,  # Streamlit에서 인덱스 숨기기 (최신 버전)
+            use_container_width=True
         )
 
 ############################################################################################################
@@ -202,7 +204,7 @@ def run_country():
     # ✅ 라디오 버튼 (값 변경 시 자동 반영)
     with col1:
         st.radio(
-            "🔹 따논당상 1~5위 국가 중 선택",
+            "🔹 따논당상 입국자 1~5위 국가 중 선택",
             top_countries,
             index=None,  # 기본 선택 없음
             key="selected_country_1",
@@ -212,7 +214,7 @@ def run_country():
 
     with col2:
         st.radio(
-            "🔹 블루오션 6~10위 국가 중 선택",
+            "🔹 블루오션 입국자 6~10위 국가 중 선택",
             top_countries_next,
             index=None,  # 기본 선택 없음
             key="selected_country_2",
@@ -236,7 +238,7 @@ def run_country():
         if not filtered_values.empty:  # 값이 존재하는 경우
             expected_visitors = int(filtered_values.sum())  # 총합을 정수로 변환
             st.write(f"**🙂 예상 입국인원:** {expected_visitors:,} 명")
-            st.write(f"{selected_country} 관광객을 위한 {year}년 {month}월 여행패키지 구상을 시작합니다.") # 천 단위 콤마 표시
+            st.write(f"{year}년 {month}월, {selected_country} 관광객을 위한 여행패키지 구상을 시작합니다.✈️🎉") # 천 단위 콤마 표시
             st.session_state["selected_year"] = year
             st.session_state["selected_month"] = month
             st.session_state["selected_country"] = selected_country

@@ -159,8 +159,8 @@ def run_festival():
 
         # ✅ 축제 데이터가 없을 경우 처리
     if len(festival_list) == 0:
-        st.warning(f"""🚨 한국관광공사에 {year}년 {month}월에 진행 예정인 축제 정보가 아직 업데이트되지 않았습니다.  
-                Seasons 메뉴에서 해당 달에 어울리는 여행 코스를 고려해보세요.""")
+        st.warning(f"""🚨 한국관광공사에 {year}년 {month}월 예정된 축제 정보가 아직 업데이트되지 않았습니다.  
+                Seasons 메뉴에서 해당 달에 어울리는 여행 코스를 참고해보세요! 😊""")
         if st.button(f"➡ Seasons 메뉴로 이동"):
             navigate_to("Seasons")
     
