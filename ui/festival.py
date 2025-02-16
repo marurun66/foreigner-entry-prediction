@@ -106,10 +106,6 @@ def run_festival():
     }
 
     # ✅ API 요청 및 응답 처리
-    with st.spinner("🔄 API에서 응답을 기다리는 중입니다... 잠시만 기다려 주세요."):
-        time.sleep(12)
-
-
     response = requests.get(BASE_URL, params=params)
     if response.status_code != 200:
         st.error("❌ API 요청 실패! 다시 시도해 주세요.")

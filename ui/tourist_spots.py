@@ -13,11 +13,12 @@ import re
 
 def extract_region(address):
     """
-    주소에서 '도 + 시/군' 또는 '광역시' 정보를 추출하는 함수
+    주소에서 '도 + 시/군' 또는 '광역시' 정보만 추출
     - '전북특별자치도 고창군 공음면 청천길 41-27' → ('전라북도', '고창군')
     - '서울특별시 중구 을지로 281 (을지로7가)' → ('서울특별시', '중구')
     - '경기도 수원시 영통구 영통동' → ('경기도', '수원시')
-    - '김천시' → ('', '김천시')
+    - '김천시 청암사' → ('', '김천시')  ✅ 청암사 제거
+    - '부산' → ('부산광역시', '')  ✅ 광역시만 입력해도 정상 처리
     """
 
     # ✅ "특별자치도" → 기존 명칭으로 변환
@@ -26,11 +27,11 @@ def extract_region(address):
         "강원특별자치도": "강원도"
     }
     
-    # ✅ 정규식 패턴 (특별자치도 포함)
+    # ✅ 정규식 패턴 (특별자치도 포함, 시·군·구가 없어도 매칭 가능하도록 개선)
     pattern = re.compile(
-        r"^(?:(서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시|제주특별자치도|"
-        r"전북특별자치도|강원특별자치도|경기도|충청북도|충청남도|전라북도|전라남도|경상북도|경상남도)\s*)?"
-        r"(\S+시|\S+군|\S+구)?"
+        r"^(서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시|제주특별자치도|"
+        r"전북특별자치도|강원특별자치도|경기도|충청북도|충청남도|전라북도|전라남도|경상북도|경상남도)"
+        r"(?:\s+(\S+시|\S+군|\S+구))?"  # 시·군·구가 없어도 매칭되도록 변경
     )
 
     match = pattern.search(address)
@@ -48,6 +49,10 @@ def extract_region(address):
         if province == "서울특별시":
             return province, city_or_district
 
+        # ✅ 광역시·특별시·도만 입력한 경우 → 시·군·구 없이 반환
+        if province and not city_or_district:
+            return province, ""
+
         # ✅ 도가 없는 경우 → 유저가 "경주시"만 입력한 경우, 그대로 반환
         if not province and city_or_district:
             return "", city_or_district
@@ -56,6 +61,7 @@ def extract_region(address):
         return province, city_or_district if city_or_district else ""
 
     return None, None
+
 
 
 def get_coordinates_from_address(address):
@@ -285,4 +291,3 @@ def run_tourist_spots():
 
     else:
         st.warning("🔍 해당 지역에서 관광지를 찾을 수 없습니다.")
-

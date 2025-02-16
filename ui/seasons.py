@@ -119,8 +119,7 @@ def run_seasons():
     season = get_season(month)  # ✅ 계절 결정
     st.write(f"""📅 선택한 날짜: {year}년 {month}월 (계절: {season})  
              정보는 **정확한 날짜를 한번 더 확인**하세요.""")
-    with st.spinner("🔄 API에서 응답을 기다리는 중입니다... 잠시만 기다려 주세요."):
-        time.sleep(12)
+
     params = {
         "serviceKey": data_go_API_KEY,
         "numOfRows": 10,
