@@ -93,14 +93,21 @@ def filter_tourist_spots(places):
     return [place for place in places if any(keyword in place.get("category_group_name", "") for keyword in tourist_keywords)]
 
 def generate_kakao_map(places, selected_location=None):
+    print("✅ [DEBUG] generate_kakao_map() 실행됨")
+    selected_location = st.session_state.get("selected_location", "위치 정보 없음")
+    if not selected_location:
+        print("❌ [DEBUG] selected_location 값이 None 또는 빈 값입니다.")  # ✅ selected_location이 없을 경우 경고 출력
+        return
     """
     카카오 지도 HTML 생성 및 축제 위치 및 관광지 표시
     """
     # ✅ 축제 위치를 위도·경도로 변환
+    print("🛠️ [DEBUG] get_coordinates_from_address() 호출됨")
     selected_lat, selected_lng = None, None
     if selected_location:
         selected_lat, selected_lng = get_coordinates_from_address(selected_location)
-        print(f"🎯 축제 위치 변환 완료: {selected_location} → ({selected_lat}, {selected_lng})")
+        print("🛠️ [DEBUG] get_coordinates_from_address() 함수 실행됨")
+        print(f"🎯 [DEBUG] 축제 위치 변환 결과: {selected_location} → ({selected_lat}, {selected_lng})")  # 디버깅용 프린트
 
     # ✅ 지도 중심 좌표 설정
     if selected_lat and selected_lng:
@@ -108,35 +115,38 @@ def generate_kakao_map(places, selected_location=None):
     elif places:
         center_lat, center_lng = places[0]['y'], places[0]['x']
     else:
-        center_lat, center_lng = 37.5665, 126.9780  # 기본 서울 좌표
+        center_lat, center_lng = 37.5665, 126.9780  
 
     markers_js = ""
 
-    # ✅ 축제 위치 마커 (특별한 빨간색 마커 추가)
-    if selected_lat and selected_lng:
+    # ✅ 🎉 축제 위치 마커 추가
+    if selected_location and selected_lat and selected_lng:
         markers_js += f"""
+            console.log("🎯 축제 마커 추가: {selected_lat}, {selected_lng}"); // JS 디버깅 로그
+            var selectedMarkerImage = new kakao.maps.MarkerImage(
+                "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+                new kakao.maps.Size(36, 45),
+                new kakao.maps.Point(18, 45)
+            );
+
             var selectedMarker = new kakao.maps.Marker({{
                 position: new kakao.maps.LatLng({selected_lat}, {selected_lng}),
                 map: map,
-                image: new kakao.maps.MarkerImage(
-                    "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
-                    new kakao.maps.Size(30, 42),
-                    new kakao.maps.Point(15, 42)
-                )
+                image: selectedMarkerImage
             }});
 
             var selectedOverlay = new kakao.maps.CustomOverlay({{
                 position: new kakao.maps.LatLng({selected_lat}, {selected_lng}),
-                content: '<div class="custom-label" style="background:#ffdddd; border-radius:6px; ' +
+                content: '<div class="custom-label" style="background:#ffaaaa; border-radius:6px; ' +
                         'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
                         'display: inline-block; white-space: nowrap; ' +
-                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🎉 {selected_location} (축제 위치)</b></div>',
-                yAnchor: 1.8  // ✅ 마커보다 말풍선이 위로 이동하도록 설정
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🎉 {selected_location} (테마 위치)</b></div>',
+                yAnchor: 1.8  
             }});
             selectedOverlay.setMap(map);
         """
 
-    # ✅ 일반 관광지 마커 추가
+    # ✅ 관광지 마커 추가
     for idx, place in enumerate(places):
         markers_js += f"""
             var marker{idx} = new kakao.maps.Marker({{
@@ -150,7 +160,7 @@ def generate_kakao_map(places, selected_location=None):
                         'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
                         'display: inline-block; white-space: nowrap; ' +
                         'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>{place["place_name"]}</b></div>',
-                yAnchor: 1.8  // ✅ 마커보다 말풍선이 위로 이동하도록 설정
+                yAnchor: 1.8  
             }});
             overlay{idx}.setMap(map);
         """
@@ -189,6 +199,7 @@ def generate_kakao_map(places, selected_location=None):
 
 
 
+
 # ✅ 관광지 정보 조회 실행 함수
 def run_tourist_spots():
     st.title("🌍 관광지 정보 조회")
@@ -218,7 +229,8 @@ def run_tourist_spots():
             🗣 언어: {language}  
             🏝 여행 성향: {travel_preference} * **여행 성향 분석은 예시 입니다.**  
             👥 입국 예상 인원: {expected_visitors:,} 명  
-            🎉 선택 테마: {selected_travel}""")
+            🎉 선택 테마: {selected_travel}  
+            테마 지역: {selected_location}""")
 
     # 🔹 위치 정보가 없을 경우 → 경고 메시지 출력 후 종료
     if not province :
@@ -240,6 +252,7 @@ def run_tourist_spots():
         # 🔹 카카오 지도 표시
         st.subheader("🗺 카카오 지도에서 관광지 확인")
         map_html = generate_kakao_map(tourist_spots)
+        
         components.html(map_html, height=500, scrolling=False)
 
         # 🔹 개별 관광지 정보 출력 (Expander)
