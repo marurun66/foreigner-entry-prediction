@@ -1,3 +1,5 @@
+
+import time
 from bs4 import BeautifulSoup
 import requests
 import xml.etree.ElementTree as ET
@@ -16,6 +18,8 @@ BASE_URL = "http://apis.data.go.kr/B551011/KorService1/searchFestival1"
 def clean_html_with_bs(text):
     """HTML 태그 제거"""
     return BeautifulSoup(text, "html.parser").get_text()
+
+
 
 def get_festival_description(festival_name):
     """네이버 검색 API - 축제 설명, 블로그주소 가져오기"""
@@ -41,6 +45,7 @@ def get_festival_description(festival_name):
 ######################################3
 
 def run_festival():
+    
     st.title("🥳 축제 정보 조회")
     st.write("""
     ✨ **한국관광공사 제공! 전국 축제 정보를 한눈에 확인하세요!** ✨  
@@ -85,9 +90,11 @@ def run_festival():
             """)
 
             return
+        
 
 
     # ✅ API 요청 파라미터 설정
+
     params = {
         "serviceKey": data_go_API_KEY,
         "numOfRows": 50,
@@ -99,6 +106,10 @@ def run_festival():
     }
 
     # ✅ API 요청 및 응답 처리
+    with st.spinner("🔄 API에서 응답을 기다리는 중입니다... 잠시만 기다려 주세요."):
+        time.sleep(12)
+
+
     response = requests.get(BASE_URL, params=params)
     if response.status_code != 200:
         st.error("❌ API 요청 실패! 다시 시도해 주세요.")

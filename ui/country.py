@@ -6,22 +6,42 @@ from navigation import navigate_to
 
 
 def run_country():
-    st.title("25,26년 국가별 예상입국인원과 국가 선택 가이드")
-    st.write("""
-    📊 **외교부 제공 데이터 + AI 예측 모델 (Prophet, XGBRegressor)** 이
-    2018년~2024년까지의 각국 입국 데이터를 분석하여,  
-    **향후 2년간의 예상 입국 인원**을 제공합니다.  
-             
-    ✅ **성공 가능성이 높은 상위 5개 국가**  
-    🚀 **새롭게 떠오르는 주목할 5개 국가**  
-    선택한 달을 기준으로 **3개월 전후의 입국자 수 추이**를 살펴보고,  
+    st.html("""
+        <div style="
+            background-color: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            border-left: 5px solid #28a745;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.6;">
+            <h2 style="color: #155724;">25,26년 국가별 예상입국인원과 국가 선택 가이드</h2>
 
-    각국 여행객들이 원하는 특별한 경험을 준비해보세요!  
-    한국의 **다채로운 축제**와 **사계절 맞춤형 여행 패키지**를 기획하여, 더 많은 글로벌 여행객을 매료시킬 기회를 만들어보세요. ✨✈️
+            <p>📊 <b>외교부 제공 데이터 + AI 예측 모델 (Prophet, XGBRegressor)</b> 이<br>
+            2018년~2024년까지의 각국 입국 데이터를 분석하여,<br>
+            <span style="color: #28a745;"><b>향후 2년간의 예상 입국 인원</b></span>을 제공합니다.</p>
+
+            <ul>
+                <li>✅ <b style="color: #28a745;">성공 가능성이 높은 상위 5개 국가</b></li>
+                <li>🚀 <b style="color: #28a745;">새롭게 떠오르는 주목할 5개 국가</b></li>
+                <li>선택한 달을 기준으로 <b>3개월 전후의 입국자 수 추이</b></li>
+            </ul>
+
+            <p>입국자들의 <span style="color: #28a745;"><b>사계절별 한국 방문 선호도</b></span>를 파악하고,</p>
+            
+            <p><b>각국 여행객들이 원하는 특별한 경험을 준비해보세요!</b></p>
+            
+            <p>한국의 <span style="color: #28a745;"><b>다채로운 축제</b></span>와 
+            <span style="color: #28a745;"><b>사계절 맞춤형 여행 패키지</b></span>를 기획하여,<br>
+            더 많은 글로벌 여행객을 매료시킬 기회를 만들어보세요. ✨✈️</p>
+
+        </div>
     """)
+
 
      # 데이터 로드
     df=pd.read_csv('data/df_total.csv')
+    seasonal_growth_df=pd.read_csv('data/df_seasonal_growth.csv')
     
     # 🍎 유저에게 예측희망 년, 월 입력
     st.subheader("예측 희망 년, 월을 입력하세요.🌍")
@@ -96,9 +116,9 @@ def run_country():
             use_container_width=True
         )
     with col2:
-        st.write("방문자 수가 50k 이상 예상되는 국가")
+        st.write("방문자 수가 3k 이상 예상되는 국가")
         st.dataframe(
-            select_df[select_df["예상 입국자수"] >= 50000][["국가", "예상 입국자수"]]
+            select_df[select_df["예상 입국자수"] >= 30000][["국가", "예상 입국자수"]]
             .sort_values("예상 입국자수", ascending=False)
             .reset_index(drop=True)  # 기존 인덱스 삭제
             .rename_axis("순위")  # 인덱스 이름 설정
@@ -107,6 +127,57 @@ def run_country():
             hide_index=True,  # Streamlit에서 인덱스 숨기기 (최신 버전)
             use_container_width=True
         )
+            # 계절 판별
+        high_visitor_countries = select_df[select_df["예상 입국자수"] >= 30000][["국가", "예상 입국자수"]]
+    
+        if month in [3, 4, 5]:
+            season_col = "봄철 증가율"
+            season_name = "봄"
+        elif month in [6, 7, 8]:
+            season_col = "여름철 증가율"
+            season_name = "여름"
+        elif month in [9, 10, 11]:
+            season_col = "가을철 증가율"
+            season_name = "가을"
+        else:
+            season_col = "겨울철 증가율"
+            season_name = "겨울"
+         # 방문자 30K 이상 국가 중 계절 증가율이 가장 높은 나라 찾기
+        if not high_visitor_countries.empty:
+                # 계절별 증가율 데이터를 합침
+                merged_df = high_visitor_countries.merge(seasonal_growth_df, left_on="국가", right_on="국적지역", how="left")
+                
+                # 해당 계절 증가율이 가장 높은 나라 찾기
+                top_season_country = merged_df.nlargest(5, season_col)
+                
+                if not top_season_country.empty:
+                    country_name = top_season_country["국가"].values[0]
+                    growth_rate = top_season_country[season_col].values[0]
+                    
+                    # ✅ 계절별 추천 안내 문구 추가
+                    st.html(f"""
+                        <div style="
+                            background-color: #d4edda; 
+                            padding: 15px; 
+                            border-radius: 10px; 
+                            border-left: 5px solid #155724;
+                            color: #155724;
+                            font-size: 16px;
+                            padding-bottom: 10px;">
+                            💡 <b>Tip:</b><br>
+
+                            <span style="display: block; border-top: 1px solid #28a745; margin: 10px 0;"></span>  <!-- 초록색 얇은 줄 -->
+
+                            <b>{country_name}</b> (사계절 대비 {season_name}철 입국 증가율 {growth_rate:.2f}%)은<br>
+                            한국 사계절 중 {season_name}을 사랑하는 나라예요! 🌸🌞🍂❄️
+                        </div>
+                    """)
+
+
+
+
+            
+            
 
 ############################################################################################################
 #🍎 ±3개월 입국자 수 추이
