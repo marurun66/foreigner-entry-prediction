@@ -65,11 +65,31 @@ def get_hotels(location):
     return []
 
 def run_tourist_spots():
-    selected_festival = st.session_state.get("selected_festival", "축제 정보 없음")
-    selected_location = st.session_state.get("selected_location", "위치 정보 없음")
+    st.title("🌍 관광지 정보 조회")
+    
     year = st.session_state.get("year")
     month = st.session_state.get("month")
     selected_country = st.session_state.get("selected_country")
     info = st.session_state.get("info", {})  # 기본값 빈 딕셔너리
-    expected_visitors = st.session_state.get("expected_visitors", "미정")
-    st.title("🌍 관광지 정보 조회")
+    expected_visitors = st.session_state.get("expected_visitors", "미정")  # 기본값 설정
+    selected_festival = st.session_state.get("selected_festival", "축제 정보 없음")
+    selected_location = st.session_state.get("selected_location", "위치 정보 없음")
+
+
+    # ✅ year, month, selected_country 값이 있을 경우 정상 출력
+    if year and month and selected_country :
+        language = info.get("언어", "알 수 없음")
+        travel_preference = info.get("여행 성향", "알 수 없음")
+
+        st.write(f"""📅 선택한 날짜: {year}년 {month}월  
+                🌍 선택한 국가: {selected_country}  
+                🗣 언어: {language}  
+                🏝 여행 성향: {travel_preference} * **여행 성향 분석은 예시 입니다.**  
+                👥 입국 예상 인원: {expected_visitors:,} 명  
+                🎉 선택한 축제: {selected_festival}""")
+    else:
+        st.write(f"""여행패키지 구상을 위해서는 나라선택, 축제나 사계절 정보 후 원하는 테마 선택이 필요합니다.  
+                 Country에서부터 차근차근 선택해주세요.""")
+        
+    print(f"투어리스트:{year}, {month},{info} {selected_country}, {selected_festival}, {selected_location}")
+

@@ -1,3 +1,4 @@
+import time
 from bs4 import BeautifulSoup
 import requests
 import xml.etree.ElementTree as ET
@@ -96,7 +97,13 @@ def run_seasons():
             # ✅ 이전 값이 있으면 해당 값으로 선택, 없으면 `index=None` (초기 상태)
             month_index = month_list.index(default_month) if default_month in month_list else None
             month = st.selectbox("월", month_list, key="month", index=month_index, placeholder="월을 선택하세요")
-
+            # ✅ year, month가 유지된 경우 자동 검색 실행
+        if year_index is not None and month_index is not None:
+            st.success(f"✅ `{year}년 {month}월` 선택됨. 여행지 검색을 자동 실행합니다.")
+            season = get_season(month)
+            st.info(f"🔍 `{season}` 시즌 여행지 검색 중...")
+            time.sleep(1.5)  # ✅ 로딩 효과 
+            
         # ✅ 입력값이 없는 경우 경고 메시지 출력
         if year is None or month is None:
             st.warning("""
@@ -166,7 +173,7 @@ def run_seasons():
                     else:
                         user_input_address = travel["위치"]  # 주소가 있으면 기존 값 사용
                     if selected_country==None:
-                        st.warning("❌ 여행지를 선택하지 않았습니다. **Country** 메뉴에서 여행지를 선택해주세요.")
+                        st.warning("❌ 대상 국가를 선택하지 않았습니다. **Country** 메뉴에서 먼저 대상 국가를 선택해주세요.")
 
                     else:
                         st.button(f"🚀 {travel['여행지명']} 선택", key=f"select_{idx}")

@@ -3,6 +3,8 @@ import requests
 import xml.etree.ElementTree as ET
 import streamlit as st
 
+from navigation import navigate_to
+
 # ✅ 네이버 API 키 설정 (네이버 개발자 센터에서 발급)
 NAVER_CLIENT_ID = st.secrets["NAVER_CLIENT_ID"]
 NAVER_CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
@@ -53,6 +55,11 @@ def run_festival():
 
     # ✅ year, month, selected_country 값이 있을 경우 정상 출력
     if year and month and selected_country:
+        # 🛠️ ✅ session_state에 year, month 값 저장
+        st.session_state["year"] = year
+        st.session_state["month"] = month
+        print(f"저장값: year: {year}, month: {month}")
+
         language = info.get("언어", "알 수 없음")
         travel_preference = info.get("여행 성향", "알 수 없음")
 
@@ -61,15 +68,15 @@ def run_festival():
                 🗣 언어: {language}  
                 🏝 여행 성향: {travel_preference} * **여행 성향 분석은 예시 입니다.**  
                 👥 입국 예상 인원: {expected_visitors:,} 명""")
-        
-    else:        
+
+    else:
         # ✅ 연도 및 월 선택
         col1, col2 = st.columns([1, 1])
         with col1:
             year = st.selectbox("연도", [2025, 2026], key="year", index=None, placeholder="연도를 선택하세요")
         with col2:
             month = st.selectbox("월", list(range(1, 13)), key="month", index=None, placeholder="월을 선택하세요")
-        
+
         if year is None or month is None:
             st.warning("""
             📅 **여행 날짜와 🌎 대상 국가를 아직 선택하지 않으셨네요!**  
@@ -78,6 +85,7 @@ def run_festival():
             """)
 
             return
+
 
     # ✅ API 요청 파라미터 설정
     params = {
@@ -138,23 +146,19 @@ def run_festival():
                 st.markdown(f"[🔗 관련 블로그 보기]({festival['블로그 링크']})", unsafe_allow_html=True)  # ✅ 블로그 링크 추가
             if festival["이미지"]:
                 st.image(festival["이미지"], caption=festival["축제명"], width=500)
+            
+            if selected_country is None:
+             st.warning("❌ 대상 국가를 선택하지 않았습니다. **Country** 메뉴에서 먼저 대상 국가를 선택해주세요.")
 
-                if selected_country==None:
-                    st.warning("❌ 여행지를 선택하지 않았습니다. **Country** 메뉴에서 여행지를 선택해주세요.")
-
-                # ✅ 축제 선택 버튼 추가
-                else:
-                    if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기", key=f"btn_{idx}"):
-                        st.session_state["next_page"] = "TouristSpot"  # ✅ 다음 페이지로 설정
-                        st.session_state["force_rerun"] = True  # ✅ 강제 새로고침 플래그 추가
-
-                        # ✅ 디버깅 출력 (UI 및 터미널)
-                        st.write("🔍 **[DEBUG] 버튼 클릭됨!**")
-                        st.write(f"현재 페이지: {st.session_state.get('current_page')}")
-                        st.write(f"다음 페이지: {st.session_state.get('next_page')}")
-                        print("✅ [DEBUG] 버튼 클릭됨! next_page 설정됨.")
-                        print(f"📌 [DEBUG] next_page → {st.session_state.get('next_page')}")
-                        
-                        st.rerun()  # ✅ 페이지 리로드 
+            else :
+                if st.button(f"➡ 🎉 {festival['축제명']}와 함께하는 여행 패키지 만들기"):
+                    st.session_state["selected_festival"] = festival["축제명"]
+                    st.session_state["selected_location"] = festival["위치"]
+                    st.write(f"선택국가: {selected_country}")
+                    st.write(f"선택한 축제: {festival['축제명']}")
+                    st.write(f"선택한 위치: {festival['위치']}")
+                    navigate_to("TouristSpot")
+    
+    print(f"페스티벌 저장값 :{year}, {month}, {selected_country}")
 
 

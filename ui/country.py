@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from navigation import navigate_to
+
 
 def run_country():
     st.title("25,26년 국가별 예상입국인원과 국가 선택 가이드")
@@ -217,6 +219,7 @@ def run_country():
             on_change=update_selected_country,
             args=("selected_country_2", "selected_country_1")  # 다른 선택 해제
         )
+    
 
     selected_country = st.session_state["selected_country"]
 
@@ -240,10 +243,9 @@ def run_country():
             st.session_state["info"] = info
             st.session_state["expected_visitors"] = expected_visitors
             if st.button("➡ 축제 정보 보기"):
-                st.session_state["current_page"] = "Festival"  # ✅ 페이지 상태 변경
-                st.write(f"🔄 페이지 변경됨: {st.session_state['current_page']}")  # 디버깅용 출력
-                st.rerun()  # ✅ 페이지 새로고침하여 `run_festival()` 실행
-               
+                    navigate_to("Festival")  # ✅ `Festival`으로 이동
+
+           
         else:
             st.write("🚫 예상 입국자 수 데이터가 없습니다.")
     else:

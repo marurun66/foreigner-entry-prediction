@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+from navigation import navigate_to  # ✅ `navigate_to()`를 별도 파일에서 가져옴
 
 from ui.about import run_about
 from ui.country import run_country
@@ -15,31 +16,20 @@ st.set_page_config(
     page_icon="🌍"
 )
 
-# ✅ 초기 세션 상태 설정
+# ✅ 초기 페이지 설정
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Home"
-if "next_page" not in st.session_state:
-    st.session_state["next_page"] = None  # ✅ 초기화
-if "force_rerun" not in st.session_state:
-    st.session_state["force_rerun"] = False  # ✅ 강제 새로고침 플래그 초기화
 
-# ✅ next_page 감지 후 즉시 반영
-if st.session_state.get("next_page") is not None:
-    st.session_state["current_page"] = st.session_state["next_page"]
-    st.session_state["next_page"] = None  # ✅ `next_page` 초기화
-    st.session_state["force_rerun"] = True  # ✅ 강제 새로고침 플래그 설정
-    st.rerun()
-
-# ✅ force_rerun이 설정되었으면 강제 새로고침 실행
-if st.session_state.get("force_rerun"):
-    st.session_state["force_rerun"] = False
-    print("📌 [DEBUG] 강제 새로고침 실행!")
-    st.rerun()
-
-# ✅ 디버깅 정보 출력
-st.write("🔍 **[디버그 정보]**")
-st.write(f"현재 페이지: {st.session_state.get('current_page')}")
-print(f"📌 디버그: 현재 페이지: {st.session_state.get('current_page')}")
+# ✅ 페이지 실행 함수 매핑
+page_mapping = {
+    "Home": run_home,
+    "Country": run_country,
+    "Festival": run_festival,
+    "Seasons": run_seasons,
+    "TouristSpot": run_tourist_spots,
+    "About": run_about,
+    "Ask": run_ask
+}
 
 def main():
     menu = {
@@ -67,22 +57,9 @@ def main():
             }
         )
 
-    # ✅ 선택한 메뉴와 session_state["current_page"]를 동기화
+    # ✅ 사이드바에서 선택한 메뉴에 따라 이동
     if choice != st.session_state["current_page"]:
-        st.session_state["next_page"] = choice
-        print(f"🌍 메뉴에서 선택한 페이지: {choice}")  # ✅ 터미널 디버깅
-        st.rerun()  # ✅ 즉시 새로고침하여 반영
-
-    # ✅ 페이지 실행 함수 매핑
-    page_mapping = {
-        "Home": run_home,
-        "Country": run_country,
-        "Festival": run_festival,
-        "Seasons": run_seasons,
-        "TouristSpot": run_tourist_spots,
-        "About": run_about,
-        "Ask": run_ask
-    }
+        navigate_to(choice)
 
     # ✅ 현재 페이지 실행
     page_mapping[st.session_state["current_page"]]() 
