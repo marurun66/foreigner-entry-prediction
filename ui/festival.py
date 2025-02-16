@@ -129,15 +129,12 @@ def run_festival():
                 "이미지": image_url
             })
 
-    # ✅ 축제 데이터가 없을 경우 처리
-    if len(festival_list) == 0:
-        st.warning(f"""🚨 한국관광공사에 {year}년 {month}월에 진행 예정인 축제 정보가 아직 업데이트되지 않았습니다.  
-                Seasons 메뉴에서 해당 달에 어울리는 여행 코스를 고려해보세요.""")
+
 
     # ✅ 축제 데이터가 있을 경우 표시
     st.success(f"총 {len(festival_list)}개의 축제를 조회했습니다.")
 
-    for idx, festival in enumerate(festival_list):
+    for _, festival in enumerate(festival_list):
         with st.expander(f"📌 {festival['축제명']} (자세히 보기)"):
             st.write(f"📍 위치: {festival['위치']}")
             st.write(f"📅 일정: {festival['일정']}")
@@ -158,6 +155,13 @@ def run_festival():
                     st.write(f"선택한 축제: {festival['축제명']}")
                     st.write(f"선택한 위치: {festival['위치']}")
                     navigate_to("TouristSpot")
+
+        # ✅ 축제 데이터가 없을 경우 처리
+    if len(festival_list) == 0:
+        st.warning(f"""🚨 한국관광공사에 {year}년 {month}월에 진행 예정인 축제 정보가 아직 업데이트되지 않았습니다.  
+                Seasons 메뉴에서 해당 달에 어울리는 여행 코스를 고려해보세요.""")
+        if st.button(f"➡ Seasons 메뉴로 이동"):
+            navigate_to("Seasons")
     
     print(f"페스티벌 저장값 :{year}, {month}, {selected_country}")
 

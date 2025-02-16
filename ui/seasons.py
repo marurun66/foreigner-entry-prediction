@@ -1,8 +1,9 @@
-import time
 from bs4 import BeautifulSoup
 import requests
 import xml.etree.ElementTree as ET
 import streamlit as st
+
+from navigation import navigate_to
 
 # ✅ 네이버 API 키 설정 (네이버 개발자 센터에서 발급)
 NAVER_CLIENT_ID = st.secrets["NAVER_CLIENT_ID"]
@@ -68,6 +69,8 @@ def run_seasons():
 
     # ✅ 값이 있을 경우 정상 출력
     if year and month and selected_country:
+        st.session_state["year"] = year
+        st.session_state["month"] = month
         language = info.get("언어", "알 수 없음")
         travel_preference = info.get("여행 성향", "알 수 없음")
 
@@ -98,12 +101,7 @@ def run_seasons():
             month_index = month_list.index(default_month) if default_month in month_list else None
             month = st.selectbox("월", month_list, key="month", index=month_index, placeholder="월을 선택하세요")
             # ✅ year, month가 유지된 경우 자동 검색 실행
-        if year_index is not None and month_index is not None:
-            st.success(f"✅ `{year}년 {month}월` 선택됨. 여행지 검색을 자동 실행합니다.")
-            season = get_season(month)
-            st.info(f"🔍 `{season}` 시즌 여행지 검색 중...")
-            time.sleep(1.5)  # ✅ 로딩 효과 
-            
+
         # ✅ 입력값이 없는 경우 경고 메시지 출력
         if year is None or month is None:
             st.warning("""
@@ -167,16 +165,22 @@ def run_seasons():
                 # ✅ 주소가 없을 경우만 입력창 표시
                     if not travel["위치"] or travel["위치"].strip() in ["정보 없음", ""]:  
                         user_input_address = st.text_input(
-                            f"📍 한국관광공사에서 주소정보를 제공하지 않았습니다. 직접 🏠 {travel['여행지명']}의 주소를 입력해주세요.",
+                            f"📍 한국관광공사에서 주소정보를 제공하지 않았습니다. 직접 지역 키워드를 입력해주세요. ex)강원도 삼척시",
                             key=f"address_input_{idx}"
                         )
                     else:
                         user_input_address = travel["위치"]  # 주소가 있으면 기존 값 사용
-                    if selected_country==None:
+#####
+                    if selected_country is None:
                         st.warning("❌ 대상 국가를 선택하지 않았습니다. **Country** 메뉴에서 먼저 대상 국가를 선택해주세요.")
 
-                    else:
-                        st.button(f"🚀 {travel['여행지명']} 선택", key=f"select_{idx}")
-                        st.session_state.selected_travel = travel["여행지명"]
-                        st.session_state.selected_location = user_input_address  # ✅ 유저 입력 반영
-                        st.success(f"✅ {travel['여행지명']}을(를) 참고해서 여행코스 준비 시작하겠습니다. (주소: {user_input_address})")
+                    else :
+                        if st.button(f"➡ {travel['여행지명']} 시즌테마로 여행 패키지 만들기"):
+                            st.session_state.selected_travel = travel["여행지명"]
+                            st.session_state.selected_location = user_input_address
+                            st.write(f"선택국가: {selected_country}")
+                            st.write(f"선택한 시즌테마: {travel['여행지명']}")
+                            st.write(f"선택한 위치: {user_input_address}")
+                            navigate_to("TouristSpot")
+
+    print(f"시즌 저장값 :{year}, {month}, {selected_country}, {travel['여행지명']}, {user_input_address}")
