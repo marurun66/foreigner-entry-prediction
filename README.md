@@ -78,9 +78,9 @@
 ---
 
 ## 🚀 **Streamlit 배포**
-로컬 환경에서 앱 테스트 후 requirements.txt를 생성하여 필요한 라이브러리 목록을 관리
-GitHub에 애플리케이션를 업로드
-Streamlit Share를 활용하여 외부에서 접속 가능하도록 서비스화
+로컬 환경에서 앱 테스트 후 requirements.txt를 생성하여 필요한 라이브러리 목록을 관리  
+GitHub에 애플리케이션를 업로드  
+Streamlit Share를 활용하여 외부에서 접속 가능하도록 서비스화  
 
 ---
 
