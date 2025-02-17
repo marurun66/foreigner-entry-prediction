@@ -4,6 +4,32 @@ import plotly.express as px
 
 from navigation import navigate_to
 
+def get_top_country(df, year, month):
+    """사용자가 선택한 연도와 월을 기준으로 입국자 수 증가량이 가장 큰 1개 국가를 반환하는 함수"""
+    df1=pd.read_csv('data/df_total.csv')
+    # 1월이면 작년 12월과 비교
+    if month == 1:
+        prev_year = year - 1
+        prev_month = 12
+    else:
+        prev_year = year
+        prev_month = month - 1
+
+    # 현재 월과 이전 월 데이터 분리
+    df_latest = df1[(df1["년"] == year) & (df1["월"] == month)]
+    df_previous = df1[(df1["년"] == prev_year) & (df1["월"] == prev_month)]
+    
+    if df_latest.empty or df_previous.empty:
+        st.warning("선택한 연도와 월에 대한 충분한 데이터가 없습니다.")
+        return None
+    
+    # 입국자 수 차이 계산
+    df_merge = df_latest.merge(df_previous, on="국적지역", suffixes=("_latest", "_previous"))
+    df_merge["입국자수_증가"] = df_merge["입국자수_latest"] - df_merge["입국자수_previous"]
+    
+    # 증가량이 가장 큰 상위 3개 국가 선택
+    return df_merge.nlargest(1, "입국자수_증가")
+
 
 def run_country():
     st.title("🌍 25,26년 국가별 예상입국인원과 국가 선택 가이드")
@@ -171,13 +197,6 @@ def run_country():
                             한국 사계절 중 {season_name}을 사랑하는 나라예요! 🌸🌞🍂❄️
                         </div>
                     """)
-
-
-
-
-            
-            
-
 ############################################################################################################
 #🍎 ±3개월 입국자 수 추이
     # 날짜 컬럼 생성
@@ -246,6 +265,32 @@ def run_country():
         yaxis_title="예측 입국자 수"
     )
     st.plotly_chart(fig2)  # ✅ 두 번째 차트 출력
+
+    # 분석 실행
+    top_country = get_top_country(df, year, month)
+    
+    if top_country is not None and not top_country.empty:
+        row = top_country.iloc[0]
+        country_name = row["국적지역"]
+        growth_rate = (row["입국자수_증가"] / row["입국자수_previous"]) * 100 if row["입국자수_previous"] > 0 else 0
+        
+        st.html(f"""
+            <div style="
+                background-color: #d4edda; 
+                padding: 15px; 
+                border-radius: 10px; 
+                border-left: 5px solid #155724;
+                color: #155724;
+                font-size: 16px;
+                padding-bottom: 10px;">
+                💡 <b>월별 입국 증가 데이터</b><br>
+
+                <span style="display: block; border-top: 1px solid #28a745; margin: 10px 0;"></span>  <!-- 초록색 얇은 줄 -->
+
+                <b>{country_name}</b> (전월 대비 입국 증가율 {growth_rate:.2f}%)<br>
+                {month}월 기준으로 입국자 수가 가장 많이 증가한 국가입니다! 📈✈️
+            </div>
+        """)
 
 #####################################################
 

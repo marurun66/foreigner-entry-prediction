@@ -21,45 +21,34 @@ def run_about():
     st.header("🔍 사용된 기술")
     st.markdown("""
     - **개발언어**: Python
-    - **예측 모델**: Prophet, XGBoost  
+    - **예측 모델**: Prophet, XGBoost Regressor
     - **자연어 처리 모델**: Google Gemma-2-9b-it LLM API
-    - **데이터 출처**: 
+    - **데이터 출처**: 법무부_외국인 국적 및 월별 입국자 현황 "[데이터 출처: 공공데이터포털](https://www.data.go.kr/data/3074937/fileData.do)"
     - **웹 프레임워크**: Streamlit  
-    - **한국관광공사 API, 네이버 블로그 API, 카카오 맵 API  =
+    - **한국관광공사 API, 네이버 블로그 API, 카카오 맵 API 활용**
     """)
 
     st.header("AI 모델 채택과정")
     st.markdown("""
-    - 1. **Linear Regression** 모델로 접근 : 선형 회귀모델의 계절성 반영의 한계
+    - 1. **Linear Regression** 모델로 접근(r2_score = 0.88): r2스코어는 높았으나 선형 회귀모델의 계절성 반영의 한계
+    """)
+    st.markdown("""
+    - 2. **Prophet** 모델 적용 : 계절성 반영이 가능한 모델, 중국제외 MAPE(평균 절대 백분율 오차)도 4~15%대로 준수한 예측 수준을 보여 채택
     """)
     df=pd.read_csv("data/evaluation_df.csv")
-    st.dataframe(df)
-    st.markdown("""
-    - 2. **Prophet** 모델 적용 : 계절성 반영이 가능한 모델,  채택
-    """)
+    st.dataframe(df, use_container_width=True)
+
     col1, col2 = st.columns([1, 1])
     with col1:
         st.image("image/prophet_China.png", use_container_width=True)
     with col2:
         st.image("image/XGB_China.png", use_container_width=True)
     st.markdown("""
-    - 3. **XGBoost** 모델 적용 : 계절성 규칙이 깨진 중국에 대해서만 트리 기반 회귀 XGBoost 모델 적용, 
+    - 3. **XGBoost** 모델 적용(r2_score=0.98) : 계절성 규칙이 깨진 중국에 대해서만 트리 기반 회귀 XGBoost 모델 적용, 
                 최대한의 계절성 반영을 위해 '월_sin', '월_cos’로 처리하여 1월과 12월간의 연속성을 반영할 수 있게 처리
     - 4. **Google Gemma-2-9b-it LLM API** 적용 : Hugging Face Inference API를 활용한 맞춤형 여행 일정 추천
     """)
 
-
-    st.header("🎯 어떻게 활용할 수 있나요?")
-    st.markdown("""
-    ✔️ **관광업 관계자** → 입국자 트렌드를 기반으로 마케팅 전략 수립  
-    ✔️ **여행 기획자** → 사계절별 인기 여행지 & 축제 정보를 바탕으로 여행 패키지 기획  
-    ✔️ **여행자** → AI 여행 플래너로 맞춤 여행 일정 추천 받기  
-    """)
     
-    st.header("📬 문의 & 기여 방법")
-    st.markdown("""
-    - GitHub Issues를 통해 피드백 남기기  
-    - 프로젝트에 기여하고 싶다면 PR 요청 환영!  
-    """)
     
     st.markdown("✨ AI 기반 맞춤 여행 예측 서비스와 함께 새로운 여행 트렌드를 만나보세요! ✨")
