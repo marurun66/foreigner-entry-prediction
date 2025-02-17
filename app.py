@@ -46,7 +46,7 @@ def main():
         default_index = list(menu.keys()).index(st.session_state["current_page"]) if st.session_state["current_page"] in menu else 0
         choice = option_menu(
             "Menu", list(menu.keys()),
-            icons=['house', 'globe', 'calendar-event', 'cloud-sun', 'binoculars', 'info-circle', 'question-circle'],
+            icons=['house', 'globe', 'calendar-event', 'cloud-sun', 'binoculars', 'bi bi-chat-dots','info-circle'],
             menu_icon="app-indicator",
             default_index=default_index,
             styles={

@@ -6,6 +6,7 @@ from navigation import navigate_to
 
 
 def run_country():
+    st.title("🌍 25,26년 국가별 예상입국인원과 국가 선택 가이드")
     st.html("""
         <div style="
             background-color: #f8f9fa; 
@@ -15,8 +16,6 @@ def run_country():
             color: #333;
             font-size: 16px;
             line-height: 1.6;">
-            <h2 style="color: #155724;">25,26년 국가별 예상입국인원과 국가 선택 가이드</h2>
-
             <p>📊 <b>외교부 제공 데이터 + AI 예측 모델 (Prophet, XGBRegressor)</b> 이<br>
             2018년~2024년까지의 각국 입국 데이터를 분석하여,<br>
             <span style="color: #28a745;"><b>향후 2년간의 예상 입국 인원</b></span>을 제공합니다.</p>

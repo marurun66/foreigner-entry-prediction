@@ -365,7 +365,7 @@ def run_tourist_spots():
 
     # ✅ 선택한 관광지 및 숙소를 저장할 세션 상태 초기화
     if "selected_places" not in st.session_state:
-        st.session_state.selected_places = set()
+        st.session_state.selected_places = []
 
     
     # ✅ 검색 결과 출력
