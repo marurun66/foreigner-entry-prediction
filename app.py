@@ -3,10 +3,10 @@ from streamlit_option_menu import option_menu
 from navigation import navigate_to  # ✅ `navigate_to()`를 별도 파일에서 가져옴
 
 from ui.about import run_about
+from ui.ai_planner import run_ai_planner
 from ui.country import run_country
 from ui.home import run_home
 from ui.festival import run_festival
-from ui.ai_planner import run_ai_planner
 from ui.seasons import run_seasons
 from ui.tourist_spots import run_tourist_spots
 
@@ -39,7 +39,7 @@ def main():
         "Seasons": "계절별 여행지",
         "TouristSpot": "관광지 추천",
         "About": "정보",
-        "Ask": "문의"
+        "AI PLANNER": "AI PLANNER",
     }
 
     with st.sidebar:

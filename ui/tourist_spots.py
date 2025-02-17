@@ -465,7 +465,7 @@ def run_tourist_spots():
 
             # ✅ LLM 여행 패키지 생성 버튼 (submit 후에만 나타남)
             if st.button("➡ AI와 함께 여행 패키지 만들기"):
-                navigate_to("LLM")
+                navigate_to("AI PLANNER")
         
         else:
             st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
