@@ -1,45 +1,40 @@
 import streamlit as st
 import requests
-import openai
+from huggingface_hub import InferenceClient
 
-# ✅ ChatGPT API 호출 (사용자가 원하는 여행 스타일 분석)
-def ask_chatgpt(user_prompt):
-    client = openai.OpenAI()
-    response = client.chat.completions.create(
-        model="gpt-2",  # ChatGPT 2 사용 가능
-        messages=[{"role": "system", "content": "당신은 여행 일정 추천 전문가입니다."},
-                  {"role": "user", "content": user_prompt}],
-        temperature=0.7
-    )
-    st.write(response)
-    return response.choices[0].message.content
-
-
-# ✅ Google Maps API로 거리 계산
-def get_distance(origin, destination):
-    api_key = "YOUR_GOOGLE_MAPS_API_KEY"
-    url = f"https://maps.googleapis.com/maps/api/distancematrix/json?origins={origin}&destinations={destination}&key={api_key}"
-    response = requests.get(url).json()
-    return response["rows"][0]["elements"][0]["distance"]["text"]
 
 
 def run_ai_planner():
-# ✅ Streamlit UI 설정
-    st.title("📍 AI 여행 일정 추천 시스템")
+    client = InferenceClient(
+        provider="hf-inference",
+        api_key="" #readAPIKEY
+    )
 
-    # ✅ 사용자 입력
-    user_input = st.text_input("여행 계획을 입력하세요", "서울 불꽃 축제에 가고 싶은데, 근처 관광지도 포함해서 일정을 추천해줘.")
+    messages = [
+        {
+            "role": "user",
+            "content": "나는 한국 여행사의 직원입니다. 25년 4월 대만 손님을 위한 한국 여행 코스를 준비해야합니다. 대만 손님을 위해 사전에 준비하면 좋을 게 무엇인지 알려주세요. 전라남도 강진군 강진청자축제를 둘러보며, 가우도, 주작산자연휴양림, 덕룡산을 여행코스에 넣고 싶습니다. 고객이 한국에 입국해서 관광지들을 둘러보고, 귀국할 수 있는 여행 일정을 작성해주세요. 한글로 작성해주세요."
+        }
+    ]
 
-    if st.button("여행 일정 추천받기"):
-        # ✅ ChatGPT 2에게 요청
-        itinerary = ask_chatgpt(user_input)
-        st.subheader("📌 추천 일정")
-        st.write(itinerary)
+    completion = client.chat.completions.create(
+        model="google/gemma-2-9b-it", 
+        messages=messages, 
+        max_tokens=1024,
+    )
 
-        # ✅ 이동 거리 계산 예제
-        origin = "경복궁, 서울"
-        destination = "남산타워, 서울"
-        distance = get_distance(origin, destination)
-        
-        st.subheader("🚗 이동 거리 계산")
-        st.write(f"{origin} → {destination}: {distance}")
+    print(completion.choices[0].message)
+
+
+
+def run_ai_planner():
+    ## 🔹 이전 페이지에서 가져온 정보들
+    year = st.session_state.get("year")
+    month = st.session_state.get("month")
+    selected_country = st.session_state.get("selected_country")
+    info = st.session_state.get("info", {})  # 기본값 빈 딕셔너리
+    expected_visitors = st.session_state.get("expected_visitors", "미정")  # 기본값 설정
+    selected_travel = st.session_state.get("selected_travel", "축제,테마 정보 없음")
+    selected_location = st.session_state.get("selected_location", "위치 정보 없음")
+    selected_places = st.session_state.get("selected_places", [])
+    pass
