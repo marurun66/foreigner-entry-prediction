@@ -10,7 +10,7 @@
 ### 🗺️ **국가별 입국자 예측 (Country 메뉴)**
 - **Prophet + XGBRegressor 모델**을 활용하여 **15개국의 2025~2026년 예상 입국자 수** 제공
 - 특정 계절 방문도가 높은 나라를 **계절별 입국 증가율(%) 계산**을 통해 제시
-- **입국 예정자 상위 1~5위 국가 & 블루오션을 위한 6~10위 국가 추천**
+- **입국 예정자 상위 1\~5위 국가 & 블루오션을 위한 6\~10위 국가 추천**
 
 ### 🎉 **축제 정보 (Festival 메뉴)**
 - **한국관광공사 API**에서 실시간 축제 정보 반영
@@ -64,6 +64,7 @@
 ---
 
 ## 📡 **사용한 API 및 외부 데이터**
+--**법무부_외국인 국적 및 월별 입국자 현황** "[데이터 출처: 공공데이터포털](https://www.data.go.kr/data/3074937/fileData.do)"
 - **한국관광공사 API** ([데이터 출처](https://www.data.go.kr/data/15101578/openapi.do#/API))
 - **네이버 블로그 검색 API** ([블로그 검색](https://openapi.naver.com/v1/search/blog.json))
 - **카카오 맵 API** ([지도 서비스](https://developers.kakao.com/console/app/1196178/config/platform))
