@@ -316,6 +316,12 @@ def run_tourist_spots():
     expected_visitors = st.session_state.get("expected_visitors", "미정")  # 기본값 설정
     selected_travel = st.session_state.get("selected_travel", "축제,테마 정보 없음")
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
+    # ✅ year, month, selected_country 값이 있을 경우 정상 출력
+    if year and month and selected_country:
+        # 🛠️ ✅ session_state에 year, month 값 저장
+        st.session_state["year"] = year
+        st.session_state["month"] = month
+        print(f"저장값: year: {year}, month: {month}")
 
     # 🔹 위치 정보가 없는 경우 → 경고 메시지 출력 후 종료
     if selected_location == "위치 정보 없음" or not selected_country:
@@ -359,7 +365,7 @@ def run_tourist_spots():
 
     # ✅ 선택한 관광지 및 숙소를 저장할 세션 상태 초기화
     if "selected_places" not in st.session_state:
-        st.session_state.selected_places = []
+        st.session_state.selected_places = set()
 
     
     # ✅ 검색 결과 출력
@@ -472,7 +478,7 @@ def run_tourist_spots():
         else:
             st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
 
-        print(f"✅ 저장된 선택 목록: {st.session_state.selected_places}")
+        print(f"✅ 저장된 선택 목록: {st.session_state.selected_places},{year}, {month})")
 
 
 

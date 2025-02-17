@@ -5,20 +5,6 @@ import streamlit as st
 
 from navigation import navigate_to
 
-def save_to_csv(travel_plan, year, month, selected_country, selected_travel):
-    """AI 여행 일정을 CSV 파일로 저장 (여행 정보 포함 파일명)"""
-
-    # ✅ 파일명 생성 (예: '일본 여행객을 위한 2025년 4월 벚꽃축제 AI 여행일정.csv')
-    file_name = f"{selected_country}_여행객을_위한_{year}년_{month}월_{selected_travel}_AI_여행일정.csv"
-
-    with open(file_name, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["AI 여행 일정"])  # 헤더 추가
-        writer.writerow([travel_plan])  # 데이터 추가
-
-    return file_name  # ✅ 저장된 파일 경로 반환
-
-
 
 
 HUGGING_FACE_READ_KEY = st.secrets["HUGGING_FACE_READ_KEY"]
@@ -32,11 +18,11 @@ def generate_ai_travel_plan():
     )
 
     # ✅ 세션 상태에서 유저가 선택한 정보 가져오기
+    print
     year = st.session_state.get("year", 2025)
     month = st.session_state.get("month", 4)
     selected_country = st.session_state.get("selected_country", "대만")
     info = st.session_state.get("info", {})
-    expected_visitors = st.session_state.get("expected_visitors", "미정")
     selected_travel = st.session_state.get("selected_travel", "축제,테마 정보 없음")
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     selected_places = st.session_state.get("selected_places", [])
@@ -76,7 +62,7 @@ def run_ai_planner():
     if not st.session_state.get("selected_places"):  # 선택된 관광지 & 숙소가 없을 경우
         st.warning("""🚨 해당 메뉴에서는 외국인 관광객, 여행 날짜, 여행 지역 정보를 바탕으로 AI와 함께 여행 일정을 계획할 수 있습니다.  
                 Country 메뉴부터 시작해주세요.😉""")
-        if st.button("➡ Country 메뉴로 이동"):
+        if st.button("➡ Country"):
             navigate_to("Country")
         
         return
@@ -108,13 +94,3 @@ def run_ai_planner():
         st.subheader("📌 AI 추천 여행 일정")
         st.write(travel_plan)
 
-            # ✅ CSV 저장 후 다운로드 버튼 표시
-        if st.button("💾 CSV 파일로 저장하기"):
-            file_path = save_to_csv(travel_plan, year, month, selected_country, selected_travel)  # ✅ 파일명 포함 저장
-            with open(file_path, "rb") as f:
-                st.download_button(
-                    label="📥 CSV 다운로드",
-                    data=f,
-                    file_name=file_path,  # ✅ 동적으로 생성된 파일명 적용
-                    mime="text/csv"
-            )
