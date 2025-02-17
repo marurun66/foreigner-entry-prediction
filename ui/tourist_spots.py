@@ -322,6 +322,8 @@ def run_tourist_spots():
         st.warning(""" 해당 메뉴에서는 선택한 외국인 관광객, 여행 날짜, 여행 지역 정보를 바탕으로 여행 일정을 계획할 수 있습니다.  
                    ❌ 현재 설정된 외국인 관광객 및 여행 정보가 없습니다.❌  
                    Country 메뉴에서부터 시작해주세요.😉""")
+        if st.button("➡ Country 메뉴로 이동"):
+            navigate_to("Country")
         return
     
     province, city = extract_region(selected_location)  # ✅ 도, 시 정보 추출

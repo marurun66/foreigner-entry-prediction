@@ -316,7 +316,8 @@ def run_country():
             st.session_state["info"] = info
             st.session_state["expected_visitors"] = expected_visitors
             if st.button("➡ 축제 정보 보기"):
-                    navigate_to("Festival")  # ✅ `Festival`으로 이동
+                    navigate_to("Festival")
+                      # ✅ `Festival`으로 이동
 
            
         else:

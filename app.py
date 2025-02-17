@@ -38,8 +38,8 @@ def main():
         "Festival": "축제 정보",
         "Seasons": "계절별 여행지",
         "TouristSpot": "관광지 추천",
+        "AI PLANNER": "AI 플래너",
         "About": "정보",
-        "AI PLANNER": "AI PLANNER",
     }
 
     with st.sidebar:
