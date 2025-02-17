@@ -388,6 +388,11 @@ def run_tourist_spots():
     
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
+
+    # ✅ 폼 제출 상태를 저장하는 변수 초기화
+    if "submit_clicked" not in st.session_state:
+        st.session_state.submit_clicked = False
+
     with st.form("selection_form"):
         col1, col2 = st.columns(2)
 
@@ -418,9 +423,9 @@ def run_tourist_spots():
                         selected = st.checkbox(f"{place['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
 
                         if selected and key not in st.session_state.selected_places:
-                            st.session_state.selected_places.append(key)
+                            st.session_state.selected_places.append(place_name)
                         elif not selected and key in st.session_state.selected_places:
-                            st.session_state.selected_places.remove(key)
+                            st.session_state.selected_places.remove(place_name)
                         
             else:
                 st.warning("🔍 해당 지역에서 관광지를 찾을 수 없습니다.")
@@ -439,30 +444,33 @@ def run_tourist_spots():
                         key = f"hotel_{hotel['id']}"
                         selected = st.checkbox(f"{hotel['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
                         if selected and key not in st.session_state.selected_places:
-                            st.session_state.selected_places.append(key)
+                            st.session_state.selected_places.append(place_name)
                         elif not selected and key in st.session_state.selected_places:
-                            st.session_state.selected_places.remove(key)
+                            st.session_state.selected_places.remove(place_name)
             else:
                 st.warning("🔍 해당 지역에서 숙소를 찾을 수 없습니다.")
 
         submit_button = st.form_submit_button("✅선택 완료!")
 
-    # ✅ 선택한 관광지 & 숙소 표시
-    st.subheader("✅ 선택한 관광지 & 숙소 목록")
+    # ✅ "선택 완료" 버튼이 눌렸을 때만 아래 내용이 보이게 설정
+    if submit_button:
+        st.session_state.submit_clicked = True  # ✅ 제출 상태 저장
 
-    if st.session_state.selected_places:
-        for place in tourist_spots + hotels:
-            key = f"tourist_{place['id']}" if place in tourist_spots else f"hotel_{place['id']}"
-            if key in st.session_state.selected_places:
-                st.write(f"✔️ {place['place_name']} ({place['road_address_name'] or place['address_name']})")
+    if st.session_state.submit_clicked:
+        st.subheader("✅ 선택한 관광지 & 숙소 목록")
 
+        if st.session_state.selected_places:
+            for place_name in st.session_state.selected_places:
+                st.write(f"✔️ {place_name}")
 
-        if st.button(f"➡ LLMAI와 함께 여행 패키지 만들기"):
-            navigate_to("LLM")
-    
-    else:
-        st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
-    print(f"tourist_spot 저장 선택한 관광지 & 숙소: {st.session_state.selected_places}")
+            # ✅ LLM 여행 패키지 생성 버튼 (submit 후에만 나타남)
+            if st.button("➡ AI와 함께 여행 패키지 만들기"):
+                navigate_to("LLM")
+        
+        else:
+            st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
+
+        print(f"✅ 저장된 선택 목록: {st.session_state.selected_places}")
 
 
 

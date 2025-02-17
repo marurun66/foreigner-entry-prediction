@@ -1,13 +1,17 @@
 import streamlit as st
-import requests
 from huggingface_hub import InferenceClient
 
-
+# ✅ API 키 설정
+HUGGING_FACE_READ_KEY = st.secrets["KAKAO_API_KEY"]
 
 def run_ai_planner():
     client = InferenceClient(
         provider="hf-inference",
+<<<<<<< HEAD
         api_key="" #readAPIKEY
+=======
+        api_key=HUGGING_FACE_READ_KEY #readAPIKEY
+>>>>>>> c90580d (와우 실수)
     )
 
     messages = [

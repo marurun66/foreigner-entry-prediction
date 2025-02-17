@@ -6,7 +6,7 @@ from ui.about import run_about
 from ui.country import run_country
 from ui.home import run_home
 from ui.festival import run_festival
-from ui.recomend import run_ask
+from ui.ai_planner import run_ai_planner
 from ui.seasons import run_seasons
 from ui.tourist_spots import run_tourist_spots
 
@@ -27,8 +27,8 @@ page_mapping = {
     "Festival": run_festival,
     "Seasons": run_seasons,
     "TouristSpot": run_tourist_spots,
+    "AI PLANNER": run_ai_planner,
     "About": run_about,
-    "Ask": run_ask
 }
 
 def main():
