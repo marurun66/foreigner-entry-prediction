@@ -2,6 +2,7 @@ from huggingface_hub import InferenceClient
 import streamlit as st
 import csv
 import streamlit as st
+from io import StringIO
 
 from navigation import navigate_to
 
@@ -56,7 +57,13 @@ def generate_ai_travel_plan():
     # ✅ 응답 결과 반환
     return completion.choices[0].message["content"]
 
-
+def save_travel_plan_to_csv(travel_plan, filename):
+    """여행 계획을 CSV 파일로 저장"""
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["여행 일정"])
+    writer.writerow([travel_plan])
+    return output.getvalue()
 
 def run_ai_planner():
     if not st.session_state.get("selected_places"):  # 선택된 관광지 & 숙소가 없을 경우
@@ -93,4 +100,13 @@ def run_ai_planner():
         # ✅ AI가 생성한 여행 패키지 표시
         st.subheader("📌 AI 추천 여행 일정")
         st.write(travel_plan)
-
+    
+            # ✅ CSV 파일 저장 기능 추가
+        filename = f"{selected_country}고객을_위한_{year}년{month}월_{selected_travel}_여행계획서.csv"
+        csv_data = save_travel_plan_to_csv(travel_plan, filename)
+        st.download_button(
+            label="📥 여행 일정 CSV 다운로드",
+            data=csv_data,
+            file_name=filename,
+            mime="text/csv"
+        )
