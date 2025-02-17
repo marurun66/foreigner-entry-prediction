@@ -23,7 +23,7 @@ def get_distance(origin, destination):
     return response["rows"][0]["elements"][0]["distance"]["text"]
 
 
-def run_ask():
+def run_ai_planner():
 # ✅ Streamlit UI 설정
     st.title("📍 AI 여행 일정 추천 시스템")
 

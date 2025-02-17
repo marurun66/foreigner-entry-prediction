@@ -1,4 +1,5 @@
 
+import re
 import time
 from bs4 import BeautifulSoup
 import requests
@@ -16,8 +17,22 @@ data_go_API_KEY = st.secrets["data_go_API_KEY"]
 BASE_URL = "http://apis.data.go.kr/B551011/KorService1/searchFestival1"
 
 def clean_html_with_bs(text):
-    """HTML 태그 제거"""
-    return BeautifulSoup(text, "html.parser").get_text()
+    """HTML 태그 및 마크다운 기호 제거"""
+    # 1️⃣ HTML 태그 제거
+    cleaned_text = BeautifulSoup(text, "html.parser").get_text()
+
+    # 2️⃣ 마크다운 기호 제거 (취소선, 볼드, 이탤릭 등)
+    markdown_patterns = [
+        r"\*\*(.*?)\*\*",  # **볼드체**
+        r"__(.*?)__",      # __이탤릭체__
+        r"~~(.*?)~~",      # ~~취소선~~
+        r"`(.*?)`",        # `코드 블록`
+        r"\[(.*?)\]\(.*?\)" # [링크 텍스트](URL)
+    ]
+    for pattern in markdown_patterns:
+        cleaned_text = re.sub(pattern, r"\1", cleaned_text)  # 태그 내용만 남기고 마크다운 기호 삭제
+
+    return cleaned_text
 
 
 
