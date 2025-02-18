@@ -177,8 +177,10 @@ def filter_hotel(places):
 ################################################
 
 
+import os
+
 def generate_kakao_map(places, hotels, selected_location=None):
-    """카카오 지도 HTML 파일을 생성하고, iframe으로 불러오기"""
+    """카카오 지도 HTML 파일을 생성하고, HTTPS 환경에서도 정상적으로 작동하도록 설정"""
 
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     if not selected_location:
@@ -203,7 +205,7 @@ def generate_kakao_map(places, hotels, selected_location=None):
     if selected_location and selected_lat and selected_lng:
         markers_js += f"""
             var selectedMarkerImage = new kakao.maps.MarkerImage(
-                "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+                "https://ssl.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
                 new kakao.maps.Size(36, 45),
                 new kakao.maps.Point(18, 45)
             );
@@ -263,7 +265,7 @@ def generate_kakao_map(places, hotels, selected_location=None):
             hotelOverlay{idx}.setMap(map);
         """
 
-    # ✅ 카카오 지도 HTML 코드 생성 및 저장
+    # ✅ HTTPS 환경을 강제하는 카카오 지도 API 사용
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -289,7 +291,7 @@ def generate_kakao_map(places, hotels, selected_location=None):
     </html>
     """
 
-    # ✅ HTML 파일 저장 (현재 작업 디렉토리)
+    # ✅ HTML 파일 저장 (Streamlit이 읽을 수 있도록 설정)
     file_path = os.path.join(os.getcwd(), "map.html")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(map_html)
@@ -364,7 +366,7 @@ def run_tourist_spots():
     # ✅ 선택한 관광지 및 숙소를 저장할 세션 상태 초기화
     if "selected_places" not in st.session_state:
         st.session_state.selected_places = set()
-#############시작
+
 #######3시작
     
     # ✅ 검색 결과 출력
@@ -390,7 +392,7 @@ def run_tourist_spots():
 
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-    # ✅ 카카오 지도 HTML 파일 생성
+# ✅ 카카오 지도 HTML 파일 생성
     map_file_path = generate_kakao_map(tourist_spots, hotels)
 
     # ✅ HTML 파일을 직접 읽어서 Streamlit에서 렌더링
@@ -401,6 +403,7 @@ def run_tourist_spots():
         st.components.v1.html(map_html_content, height=500)
     else:
         st.error("❌ 지도 파일을 생성하는 데 실패했습니다.")
+
         
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
