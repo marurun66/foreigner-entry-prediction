@@ -271,7 +271,7 @@ def generate_kakao_map(places,hotels,selected_location=None):
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" 
-            src="https://ssl.daumcdn.net/dmaps/map_js_init/v3.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
+            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
 
     </head>
     <body>
