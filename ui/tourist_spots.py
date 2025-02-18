@@ -39,6 +39,7 @@ def extract_region(address):
 
     match = pattern.search(address)
 
+
     if match:
         province = match.group(1) if match.group(1) else ""  # 도·광역시·특별시
         city_or_district = match.group(2) if match.group(2) else ""  # 시·군·구
@@ -172,34 +173,38 @@ def filter_hotel(places):
         if any(keyword in (place.get("category_group_name", "") + place.get("place_name", "")) for keyword in hotel_keywords)
     ]
 
-def generate_kakao_map(places,hotels,selected_location=None):
+
+
+###################
+def generate_kakao_map(places, hotels, selected_location=None):
+    """
+    카카오 지도 HTML 생성 및 관광지 & 호텔 표시
+    """
+    KAKAO_JS_KEY = st.secrets["KAKAO_JS_KEY"]  # ✅ API 키 가져오기
 
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     if not selected_location:
-        return
-    """
-    카카오 지도 HTML 생성 및 축제 위치 및 관광지 표시
-    """
-    # ✅ 축제 위치를 위도·경도로 변환
+        return ""
 
+    # ✅ 축제 위치를 위도·경도로 변환
     selected_lat, selected_lng = None, None
     if selected_location:
         selected_lat, selected_lng = get_coordinates_from_address(selected_location)
 
-    # ✅ 지도 중심 좌표 설정
+    # ✅ 지도 중심 좌표 설정 (축제 위치 → 관광지 첫 번째 → 기본 서울 좌표)
     if selected_lat and selected_lng:
         center_lat, center_lng = selected_lat, selected_lng
     elif places:
         center_lat, center_lng = places[0]['y'], places[0]['x']
     else:
-        center_lat, center_lng = 37.5665, 126.9780  
+        center_lat, center_lng = 37.5665, 126.9780  # 기본 서울 중심 좌표
 
+    # ✅ 마커 및 오버레이 생성 (JS 코드)
     markers_js = ""
 
-    # ✅ 🎉 축제 위치 마커 추가
+    # 🎉 축제 위치 마커 추가 (빨간색)
     if selected_location and selected_lat and selected_lng:
         markers_js += f"""
-            console.log("🎯 축제 마커 추가: {selected_lat}, {selected_lng}"); // JS 디버깅 로그
             var selectedMarkerImage = new kakao.maps.MarkerImage(
                 "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
                 new kakao.maps.Size(36, 45),
@@ -223,7 +228,7 @@ def generate_kakao_map(places,hotels,selected_location=None):
             selectedOverlay.setMap(map);
         """
 
-    # ✅ 관광지 마커 추가
+    # 🏞️ 관광지 마커 추가 (초록색)
     for idx, place in enumerate(places):
         markers_js += f"""
             var marker{idx} = new kakao.maps.Marker({{
@@ -236,13 +241,13 @@ def generate_kakao_map(places,hotels,selected_location=None):
                 content: '<div class="custom-label" style="background:#aaffde; border-radius:6px; ' +
                         'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
                         'display: inline-block; white-space: nowrap; ' +
-                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏞️{place["place_name"]}</b></div>',
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏞️ {place["place_name"]}</b></div>',
                 yAnchor: 1.8  
             }});
             overlay{idx}.setMap(map);
         """
 
-    # ✅ 호텔 마커 추가 (파란색)
+    # 🏨 호텔 마커 추가 (파란색)
     for idx, hotel in enumerate(hotels):
         markers_js += f"""
             var hotelMarker{idx} = new kakao.maps.Marker({{
@@ -261,7 +266,7 @@ def generate_kakao_map(places,hotels,selected_location=None):
             hotelOverlay{idx}.setMap(map);
         """
 
-    # ✅ 카카오 지도 HTML 코드 생성
+    # ✅ 카카오 지도 HTML 코드 생성 (비동기 로딩 적용)
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -269,25 +274,29 @@ def generate_kakao_map(places,hotels,selected_location=None):
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" 
-            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
+            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"
+            async defer></script>
     </head>
     <body>
         <div id="map" style="width: 100%; height: 500px;"></div>
         <script>
-            var mapContainer = document.getElementById('map'),
-                mapOption = {{
-                    center: new kakao.maps.LatLng({center_lat}, {center_lng}),
-                    level: 10
-                }};
-            var map = new kakao.maps.Map(mapContainer, mapOption);
-
-            {markers_js}
+            document.addEventListener("DOMContentLoaded", function() {{
+                setTimeout(function() {{
+                    var mapContainer = document.getElementById('map');
+                    var mapOption = {{
+                        center: new kakao.maps.LatLng({center_lat}, {center_lng}),
+                        level: 10
+                    }};
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+                    {markers_js}
+                }}, 500);  // ✅ 0.5초 딜레이 후 지도 로드
+            }});
         </script>
     </body>
     </html>
     """
-    return map_html
 
+    return map_html
 
 
 
