@@ -106,14 +106,18 @@ def get_coordinates_from_address(address):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"query": address}
 
+
+
     response = requests.get(url, headers=headers, params=params)
+    
     if response.status_code == 200:
         data = response.json()
+
+        
         if data["documents"]:
             x = data["documents"][0]["x"]  # 경도 (longitude)
             y = data["documents"][0]["y"]  # 위도 (latitude)
             return float(y), float(x)  # 위도, 경도 반환
-    return None, None
 
 
 ################################################
@@ -169,115 +173,125 @@ def filter_hotel(places):
         if any(keyword in (place.get("category_group_name", "") + place.get("place_name", "")) for keyword in hotel_keywords)
     ]
 
+def generate_kakao_map(places,hotels,selected_location=None):
 
-###################
-def generate_kakao_map(places, hotels, selected_location=None):
-    """
-    카카오 지도 HTML 생성 및 관광지 & 호텔 표시 (비동기 로드 적용)
-    """
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
-
+    if not selected_location:
+        return
+    """
+    카카오 지도 HTML 생성 및 축제 위치 및 관광지 표시
+    """
     # ✅ 축제 위치를 위도·경도로 변환
-    selected_lat, selected_lng = get_coordinates_from_address(selected_location)
 
-    # ✅ 지도 중심 좌표 설정 (기본 좌표: 서울)
+    selected_lat, selected_lng = None, None
+    if selected_location:
+        selected_lat, selected_lng = get_coordinates_from_address(selected_location)
+
+    # ✅ 지도 중심 좌표 설정
     if selected_lat and selected_lng:
         center_lat, center_lng = selected_lat, selected_lng
     elif places:
         center_lat, center_lng = places[0]['y'], places[0]['x']
     else:
-        center_lat, center_lng = 37.5665, 126.9780  # 기본 서울 좌표
+        center_lat, center_lng = 37.5665, 126.9780  
 
-    # ✅ 마커 및 오버레이 생성 (JS 코드)
     markers_js = ""
 
-    # 🎉 축제 위치 마커 추가 (빨간색)
-    if selected_lat and selected_lng:
+    # ✅ 🎉 축제 위치 마커 추가
+    if selected_location and selected_lat and selected_lng:
         markers_js += f"""
+            console.log("🎯 축제 마커 추가: {selected_lat}, {selected_lng}"); // JS 디버깅 로그
+            var selectedMarkerImage = new kakao.maps.MarkerImage(
+                "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+                new kakao.maps.Size(36, 45),
+                new kakao.maps.Point(18, 45)
+            );
+
             var selectedMarker = new kakao.maps.Marker({{
                 position: new kakao.maps.LatLng({selected_lat}, {selected_lng}),
-                map: map
+                map: map,
+                image: selectedMarkerImage
             }});
 
             var selectedOverlay = new kakao.maps.CustomOverlay({{
                 position: new kakao.maps.LatLng({selected_lat}, {selected_lng}),
-                content: '<div style="background:#ffaaaa; padding:6px; font-size:12px; font-weight:bold;">🎉 {selected_location}</div>',
+                content: '<div class="custom-label" style="background:#ffaaaa; border-radius:6px; ' +
+                        'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
+                        'display: inline-block; white-space: nowrap; ' +
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🎉 {selected_location} (테마 위치)</b></div>',
                 yAnchor: 1.8  
             }});
             selectedOverlay.setMap(map);
         """
 
-    # 🏞️ 관광지 마커 추가 (초록색)
+    # ✅ 관광지 마커 추가
     for idx, place in enumerate(places):
         markers_js += f"""
             var marker{idx} = new kakao.maps.Marker({{
                 position: new kakao.maps.LatLng({place['y']}, {place['x']}),
                 map: map
             }});
+
+            var overlay{idx} = new kakao.maps.CustomOverlay({{
+                position: new kakao.maps.LatLng({place['y']}, {place['x']}),
+                content: '<div class="custom-label" style="background:#aaffde; border-radius:6px; ' +
+                        'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
+                        'display: inline-block; white-space: nowrap; ' +
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏞️{place["place_name"]}</b></div>',
+                yAnchor: 1.8  
+            }});
+            overlay{idx}.setMap(map);
         """
 
-    # 🏨 호텔 마커 추가 (파란색)
+    # ✅ 호텔 마커 추가 (파란색)
     for idx, hotel in enumerate(hotels):
         markers_js += f"""
             var hotelMarker{idx} = new kakao.maps.Marker({{
                 position: new kakao.maps.LatLng({hotel['y']}, {hotel['x']}),
                 map: map
             }});
+
+            var hotelOverlay{idx} = new kakao.maps.CustomOverlay({{
+                position: new kakao.maps.LatLng({hotel['y']}, {hotel['x']}),
+                content: '<div class="custom-label" style="background:#aaddff; border-radius:6px; ' +
+                        'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
+                        'display: inline-block; white-space: nowrap; ' +
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏨 {hotel["place_name"]}</b></div>',
+                yAnchor: 1.8  
+            }});
+            hotelOverlay{idx}.setMap(map);
         """
 
-    # ✅ 카카오 지도 HTML 코드 생성 (비동기 로딩 적용)
+    # ✅ 카카오 지도 HTML 코드 생성
     map_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
-        </head>
-        <body>
-            <div id="map" style="width: 100%; height: 500px;"></div>
-            <script>
-                function initMap() {{
-                    if (typeof kakao === "undefined" || !kakao.maps) {{
-                        console.error("🚨 카카오 지도 API 로드 실패. API 키가 올바른지 확인하세요.");
-                        return;
-                    }}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="text/javascript" 
+            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
+    </head>
+    <body>
+        <div id="map" style="width: 100%; height: 500px;"></div>
+        <script>
+            var mapContainer = document.getElementById('map'),
+                mapOption = {{
+                    center: new kakao.maps.LatLng({center_lat}, {center_lng}),
+                    level: 10
+                }};
+            var map = new kakao.maps.Map(mapContainer, mapOption);
 
-                    console.log("✅ 카카오 지도 API 로드 성공!");
-
-                    var container = document.getElementById('map');
-                    var options = {{
-                        center: new kakao.maps.LatLng(36.6727960638488, 127.210087439595),
-                        level: 10
-                    }};
-                    var map = new kakao.maps.Map(container, options);
-
-                    new kakao.maps.Marker({{
-                        position: new kakao.maps.LatLng(36.6727960638488, 127.210087439595),
-                        map: map
-                    }});
-
-                    console.log("✅ 지도 로드 성공!");
-                }}
-
-                setTimeout(function() {{
-                    if (typeof kakao !== "undefined" && kakao.maps) {{
-                        initMap();
-                    }} else {{
-                        console.error("🚨 카카오 지도 API 로딩 실패! 1초 후 재시도");
-                        setTimeout(initMap, 1000);
-                    }}
-                }}, 1000); // 1초 후 실행, 필요시 2초로 변경 가능
-            </script>
-        </body>
-        </html>
+            {markers_js}
+        </script>
+    </body>
+    </html>
     """
-    components.html(map_html, height=500, scrolling=False)
     return map_html
 
 
 
-####################
+
 
 
 
@@ -285,9 +299,8 @@ def generate_kakao_map(places, hotels, selected_location=None):
 
 # ✅ 관광지 정보 조회 실행 함수
 def run_tourist_spots():
-    
     st.title("🌍 관광지 정보 조회")
-    
+
     ## 🔹 이전 페이지에서 가져온 정보들
     year = st.session_state.get("year")
     month = st.session_state.get("month")
@@ -296,8 +309,6 @@ def run_tourist_spots():
     expected_visitors = st.session_state.get("expected_visitors", "미정")  # 기본값 설정
     selected_travel = st.session_state.get("selected_travel", "축제,테마 정보 없음")
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
-    province, city = extract_region(selected_location)  # ✅ 도, 시 정보 추출
-
     # ✅ year, month, selected_country 값이 있을 경우 정상 출력
     if year and month and selected_country:
         # 🛠️ ✅ session_state에 year, month 값 저장
@@ -314,6 +325,7 @@ def run_tourist_spots():
             navigate_to("Country")
         return
     
+    province, city = extract_region(selected_location)  # ✅ 도, 시 정보 추출
     
     # 🔹 선택된 정보 출력
     language = info.get("언어", "알 수 없음")
@@ -373,7 +385,8 @@ def run_tourist_spots():
 
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-    components.html(generate_kakao_map(places, hotels), height=500, scrolling=False)
+    map_html = generate_kakao_map(tourist_spots, hotels)
+    components.html(map_html, height=500, scrolling=False)
     
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
