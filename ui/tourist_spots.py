@@ -1,3 +1,4 @@
+import os
 import re
 from bs4 import BeautifulSoup
 import requests
@@ -174,16 +175,16 @@ def filter_hotel(places):
     ]
 
 ################################################
-def generate_kakao_map(places,hotels,selected_location=None):
+
+
+def generate_kakao_map(places, hotels, selected_location=None):
+    """카카오 지도 HTML 파일을 생성하고, iframe으로 불러오기"""
 
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     if not selected_location:
-        return
-    """
-    카카오 지도 HTML 생성 및 축제 위치 및 관광지 표시
-    """
-    # ✅ 축제 위치를 위도·경도로 변환
+        return None
 
+    # ✅ 축제 위치를 위도·경도로 변환
     selected_lat, selected_lng = None, None
     if selected_location:
         selected_lat, selected_lng = get_coordinates_from_address(selected_location)
@@ -194,14 +195,13 @@ def generate_kakao_map(places,hotels,selected_location=None):
     elif places:
         center_lat, center_lng = places[0]['y'], places[0]['x']
     else:
-        center_lat, center_lng = 37.5665, 126.9780  
+        center_lat, center_lng = 37.5665, 126.9780  # 기본값 (서울)
 
     markers_js = ""
 
-    # ✅ 🎉 축제 위치 마커 추가
+    # ✅ 🎉 축제 위치 마커 추가 (빨간색)
     if selected_location and selected_lat and selected_lng:
         markers_js += f"""
-            console.log("🎯 축제 마커 추가: {selected_lat}, {selected_lng}"); // JS 디버깅 로그
             var selectedMarkerImage = new kakao.maps.MarkerImage(
                 "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
                 new kakao.maps.Size(36, 45),
@@ -225,7 +225,7 @@ def generate_kakao_map(places,hotels,selected_location=None):
             selectedOverlay.setMap(map);
         """
 
-    # ✅ 관광지 마커 추가
+    # ✅ 🏞️ 관광지 마커 추가 (초록색)
     for idx, place in enumerate(places):
         markers_js += f"""
             var marker{idx} = new kakao.maps.Marker({{
@@ -238,13 +238,13 @@ def generate_kakao_map(places,hotels,selected_location=None):
                 content: '<div class="custom-label" style="background:#aaffde; border-radius:6px; ' +
                         'padding:6px 8px; font-size:12px; color:#000; font-weight:bold; ' +
                         'display: inline-block; white-space: nowrap; ' +
-                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏞️{place["place_name"]}</b></div>',
+                        'box-shadow: 1px 1px 3px rgba(0,0,0,0.2);"><b>🏞️ {place["place_name"]}</b></div>',
                 yAnchor: 1.8  
             }});
             overlay{idx}.setMap(map);
         """
 
-    # ✅ 호텔 마커 추가 (파란색)
+    # ✅ 🏨 호텔 마커 추가 (파란색)
     for idx, hotel in enumerate(hotels):
         markers_js += f"""
             var hotelMarker{idx} = new kakao.maps.Marker({{
@@ -263,7 +263,7 @@ def generate_kakao_map(places,hotels,selected_location=None):
             hotelOverlay{idx}.setMap(map);
         """
 
-    # ✅ 카카오 지도 HTML 코드 생성
+    # ✅ 카카오 지도 HTML 코드 생성 및 저장
     map_html = f"""
     <!DOCTYPE html>
     <html>
@@ -288,9 +288,13 @@ def generate_kakao_map(places,hotels,selected_location=None):
     </body>
     </html>
     """
-    return map_html
 
+    # ✅ HTML 파일 저장 (현재 작업 디렉토리)
+    file_path = os.path.join(os.getcwd(), "map.html")
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(map_html)
 
+    return file_path  # 생성된 HTML 파일 경로 반환
 
 
 
@@ -386,9 +390,18 @@ def run_tourist_spots():
 
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-    map_html = generate_kakao_map(tourist_spots, hotels)
-    components.html(map_html, height=500, scrolling=True)
-    
+    # ✅ 카카오 지도 HTML 파일 생성
+    map_file_path = generate_kakao_map(tourist_spots, hotels)
+
+    # ✅ HTML 파일을 직접 읽어서 Streamlit에서 렌더링
+    if map_file_path:
+        with open(map_file_path, "r", encoding="utf-8") as f:
+            map_html_content = f.read()
+        
+        st.components.v1.html(map_html_content, height=500)
+    else:
+        st.error("❌ 지도 파일을 생성하는 데 실패했습니다.")
+        
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
 
