@@ -1,5 +1,4 @@
 import re
-import time
 from bs4 import BeautifulSoup
 import requests
 import xml.etree.ElementTree as ET
@@ -199,5 +198,3 @@ def run_seasons():
                             st.write(f"선택한 시즌테마: {travel['여행지명']}")
                             st.write(f"선택한 위치: {user_input_address}")
                             navigate_to("TouristSpot")
-
-    print(f"시즌 저장값 :{year}, {month}, {selected_country}, {travel['여행지명']}, {user_input_address}")

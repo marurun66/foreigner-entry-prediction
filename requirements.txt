@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+plotly
+requests
+beautifulsoup4
+huggingface_hub
+xmltodict
+re
+streamlit-option-menu
+streamlit-aggrid

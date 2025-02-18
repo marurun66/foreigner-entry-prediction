@@ -38,7 +38,6 @@ def extract_region(address):
     )
 
     match = pattern.search(address)
-    print(f"📌 [DEBUG] 주소 입력: {address}, 매치 결과: {match}")
 
     if match:
         province = match.group(1) if match.group(1) else ""  # 도·광역시·특별시
@@ -106,23 +105,19 @@ def get_coordinates_from_address(address):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"query": address}
 
-    print(f"🔍 [DEBUG] API 요청: {url}, 주소: {address}")
+
 
     response = requests.get(url, headers=headers, params=params)
     
     if response.status_code == 200:
         data = response.json()
-        print(f"✅ [DEBUG] API 응답 데이터: {data}")  # API 응답 데이터 출력
+
         
         if data["documents"]:
             x = data["documents"][0]["x"]  # 경도 (longitude)
             y = data["documents"][0]["y"]  # 위도 (latitude)
-            print(f"🎯 [DEBUG] 변환된 좌표: ({y}, {x})")  # 변환된 좌표 확인
             return float(y), float(x)  # 위도, 경도 반환
-        else:
-            print(f"⚠️ [DEBUG] 변환된 좌표 없음: {address}")
-    else:
-        print(f"❌ [DEBUG] 주소 변환 실패: {response.status_code}, {response.text}")
+
 
 ################################################
 def search_tourist_spots(query, region, display=10):
@@ -178,21 +173,18 @@ def filter_hotel(places):
     ]
 
 def generate_kakao_map(places,hotels,selected_location=None):
-    print("✅ [DEBUG] generate_kakao_map() 실행됨")
+
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     if not selected_location:
-        print("❌ [DEBUG] selected_location 값이 None 또는 빈 값입니다.")  # ✅ selected_location이 없을 경우 경고 출력
         return
     """
     카카오 지도 HTML 생성 및 축제 위치 및 관광지 표시
     """
     # ✅ 축제 위치를 위도·경도로 변환
-    print("🛠️ [DEBUG] get_coordinates_from_address() 호출됨")
+
     selected_lat, selected_lng = None, None
     if selected_location:
         selected_lat, selected_lng = get_coordinates_from_address(selected_location)
-        print("🛠️ [DEBUG] get_coordinates_from_address() 함수 실행됨")
-        print(f"🎯 [DEBUG] 축제 위치 변환 결과: {selected_location} → ({selected_lat}, {selected_lng})")  # 디버깅용 프린트
 
     # ✅ 지도 중심 좌표 설정
     if selected_lat and selected_lng:
@@ -321,7 +313,7 @@ def run_tourist_spots():
         # 🛠️ ✅ session_state에 year, month 값 저장
         st.session_state["year"] = year
         st.session_state["month"] = month
-        print(f"저장값: year: {year}, month: {month}")
+
 
     # 🔹 위치 정보가 없는 경우 → 경고 메시지 출력 후 종료
     if selected_location == "위치 정보 없음" or not selected_country:
@@ -365,8 +357,9 @@ def run_tourist_spots():
 
     # ✅ 선택한 관광지 및 숙소를 저장할 세션 상태 초기화
     if "selected_places" not in st.session_state:
-        st.session_state.selected_places = []
-
+        st.session_state.selected_places = set()
+#############시작
+#######3시작
     
     # ✅ 검색 결과 출력
     success_box_html = f"""
@@ -431,9 +424,9 @@ def run_tourist_spots():
                         selected = st.checkbox(f"{place['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
 
                         if selected and key not in st.session_state.selected_places:
-                            st.session_state.selected_places.append(place_name)
+                            st.session_state.selected_places.add(place_name)
                         elif not selected and key in st.session_state.selected_places:
-                            st.session_state.selected_places.remove(place_name)
+                            st.session_state.selected_places.discard(place_name)
                         
             else:
                 st.warning("🔍 해당 지역에서 관광지를 찾을 수 없습니다.")
@@ -452,9 +445,9 @@ def run_tourist_spots():
                         key = f"hotel_{hotel['id']}"
                         selected = st.checkbox(f"{hotel['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
                         if selected and key not in st.session_state.selected_places:
-                            st.session_state.selected_places.append(place_name)
+                            st.session_state.selected_places.add(place_name)
                         elif not selected and key in st.session_state.selected_places:
-                            st.session_state.selected_places.remove(place_name)
+                            st.session_state.selected_places.discard(place_name)
             else:
                 st.warning("🔍 해당 지역에서 숙소를 찾을 수 없습니다.")
 
@@ -468,6 +461,7 @@ def run_tourist_spots():
         st.subheader("✅ 선택한 관광지 & 숙소 목록")
 
         if st.session_state.selected_places:
+            selected_list = list(st.session_state.selected_places)  # ✅ set을 리스트로 변환
             for place_name in st.session_state.selected_places:
                 st.write(f"✔️ {place_name}")
 
@@ -477,8 +471,5 @@ def run_tourist_spots():
         
         else:
             st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
-
-        print(f"✅ 저장된 선택 목록: {st.session_state.selected_places},{year}, {month})")
-
 
 

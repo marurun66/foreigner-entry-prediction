@@ -230,6 +230,17 @@ def run_country():
     .index.tolist()[5:]  # 6~10위
     )
 
+    # 다음 5개국 (11~15위) 가져오기
+    bottom_countries = (
+    filtered_df[filtered_df["ds"] == selected_date]
+    .groupby("국적지역")["yhat"]
+    .sum()
+    .nsmallest(5)  # ✅ 가장 작은 값 5개 가져오기
+    .index.tolist()
+    )
+
+
+
     # ✅ 상위 5개국 데이터프레임 생성
     top_5_df = filtered_df[filtered_df["국적지역"].isin(top_countries)]
 
@@ -298,8 +309,8 @@ def run_country():
     country_info_df = pd.read_csv("data/example_travel_preference.csv", index_col="국가")
     # 🍎  상위 5개국, 레드오션 추천
 
-    col1, col2 = st.columns(2)
-    # ✅ 2개의 컬럼 생성 (좌측: 1~5위 / 우측: 6~10위)
+    col1, col2, col3 = st.columns(3)
+    # ✅ 2개의 컬럼 생성 (좌측: 1~5위 / 중간: 6~10위 / 우측: 11~15위)
 
     # ✅ session_state 초기화 (없으면 기본값 설정)
     if "selected_country" not in st.session_state:
@@ -308,13 +319,18 @@ def run_country():
         st.session_state["selected_country_1"] = None
     if "selected_country_2" not in st.session_state:
         st.session_state["selected_country_2"] = None
+    if "selected_country_3" not in st.session_state:
+        st.session_state["selected_country_3"] = None  # ✅ 숨은 보석(11~15위) 선택지 추가
 
-    # ✅ 선택된 국가 업데이트 함수
-    def update_selected_country(selected_key, other_key):
+    # ✅ 선택된 국가 업데이트 함수 (선택하면 나머지 2개 선택 해제)
+    def update_selected_country(selected_key):
         selected_value = st.session_state[selected_key]
         if selected_value:  # 선택된 값이 있으면
             st.session_state["selected_country"] = selected_value
-            st.session_state[other_key] = None  # 다른 선택 해제
+            # ✅ 다른 선택지 해제
+            for key in ["selected_country_1", "selected_country_2", "selected_country_3"]:
+                if key != selected_key:
+                    st.session_state[key] = None
 
     # ✅ 라디오 버튼 (값 변경 시 자동 반영)
     with col1:
@@ -324,7 +340,7 @@ def run_country():
             index=None,  # 기본 선택 없음
             key="selected_country_1",
             on_change=update_selected_country,
-            args=("selected_country_1", "selected_country_2")  # 다른 선택 해제
+            args=("selected_country_1",)  # ✅ 한 개의 인자만 전달하도록 수정
         )
 
     with col2:
@@ -334,8 +350,19 @@ def run_country():
             index=None,  # 기본 선택 없음
             key="selected_country_2",
             on_change=update_selected_country,
-            args=("selected_country_2", "selected_country_1")  # 다른 선택 해제
+            args=("selected_country_2",)  # ✅ 한 개의 인자만 전달하도록 수정
         )
+
+    with col3:
+        st.radio(
+            "🔹 숨은 보석 입국자 11~15위 국가 중 선택",
+            bottom_countries,
+            index=None,  # 기본 선택 없음
+            key="selected_country_3",
+            on_change=update_selected_country,
+            args=("selected_country_3",)  # ✅ 한 개의 인자만 전달하도록 수정
+        )
+    
     
 
     selected_country = st.session_state["selected_country"]

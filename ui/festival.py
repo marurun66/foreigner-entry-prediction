@@ -77,7 +77,6 @@ def run_festival():
         # 🛠️ ✅ session_state에 year, month 값 저장
         st.session_state["year"] = year
         st.session_state["month"] = month
-        print(f"저장값: year: {year}, month: {month}")
 
         language = info.get("언어", "알 수 없음")
         travel_preference = info.get("여행 성향", "알 수 없음")
@@ -185,6 +184,4 @@ def run_festival():
         if st.button(f"➡ Seasons 메뉴로 이동"):
             navigate_to("Seasons")
     
-    print(f"페스티벌 저장값 :{year}, {month}, {selected_country}")
-
 
