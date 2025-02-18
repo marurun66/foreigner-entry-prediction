@@ -106,18 +106,14 @@ def get_coordinates_from_address(address):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"query": address}
 
-
-
     response = requests.get(url, headers=headers, params=params)
-    
     if response.status_code == 200:
         data = response.json()
-
-        
         if data["documents"]:
             x = data["documents"][0]["x"]  # 경도 (longitude)
             y = data["documents"][0]["y"]  # 위도 (latitude)
             return float(y), float(x)  # 위도, 경도 반환
+    return None, None
 
 
 ################################################
@@ -178,18 +174,14 @@ def filter_hotel(places):
 ###################
 def generate_kakao_map(places, hotels, selected_location=None):
     """
-    카카오 지도 HTML 생성 및 관광지 & 호텔 표시
+    카카오 지도 HTML 생성 및 관광지 & 호텔 표시 (비동기 로드 적용)
     """
-    KAKAO_JS_KEY = st.secrets["KAKAO_JS_KEY"]  # ✅ API 키 가져오기
-
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
     if not selected_location:
         return ""
 
     # ✅ 축제 위치를 위도·경도로 변환
-    selected_lat, selected_lng = None, None
-    if selected_location:
-        selected_lat, selected_lng = get_coordinates_from_address(selected_location)
+    selected_lat, selected_lng = get_coordinates_from_address(selected_location)
 
     # ✅ 지도 중심 좌표 설정 (축제 위치 → 관광지 첫 번째 → 기본 서울 좌표)
     if selected_lat and selected_lng:
@@ -203,7 +195,7 @@ def generate_kakao_map(places, hotels, selected_location=None):
     markers_js = ""
 
     # 🎉 축제 위치 마커 추가 (빨간색)
-    if selected_location and selected_lat and selected_lng:
+    if selected_lat and selected_lng:
         markers_js += f"""
             var selectedMarkerImage = new kakao.maps.MarkerImage(
                 "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
@@ -297,9 +289,6 @@ def generate_kakao_map(places, hotels, selected_location=None):
     """
 
     return map_html
-
-
-
 
 
 
