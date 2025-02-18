@@ -9,6 +9,10 @@ from ui.home import run_home
 from ui.festival import run_festival
 from ui.seasons import run_seasons
 from ui.tourist_spots import run_tourist_spots
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 st.set_page_config(
     layout="wide",
