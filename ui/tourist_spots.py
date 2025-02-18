@@ -15,6 +15,7 @@ NAVER_CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
 
 ################################################
 
+
 def extract_region(address):
     """
     입력된 주소에서 '도 + 시/군' 또는 '광역시' 정보만 추출
@@ -25,11 +26,8 @@ def extract_region(address):
     """
 
     # ✅ "특별자치도" → 기존 명칭으로 변환
-    special_district_map = {
-        "전북특별자치도": "전라북도",
-        "강원특별자치도": "강원도"
-    }
-    
+    special_district_map = {"전북특별자치도": "전라북도", "강원특별자치도": "강원도"}
+
     # ✅ 정규식 패턴 (특별자치도 포함)
     pattern = re.compile(
         r"^(?:(서울특별시|부산광역시|대구광역시|인천광역시|광주광역시|대전광역시|울산광역시|세종특별자치시|제주특별자치도|"
@@ -38,7 +36,6 @@ def extract_region(address):
     )
 
     match = pattern.search(address)
-
 
     if match:
         province = match.group(1) if match.group(1) else ""  # 도·광역시·특별시
@@ -57,6 +54,7 @@ def extract_region(address):
 
     return None, None
 
+
 def clean_html_with_bs(text):
     """HTML 태그 및 마크다운 기호 제거"""
     # 1️⃣ HTML 태그 제거
@@ -65,17 +63,20 @@ def clean_html_with_bs(text):
     # 2️⃣ 마크다운 기호 제거 (취소선, 볼드, 이탤릭 등)
     markdown_patterns = [
         r"\*\*(.*?)\*\*",  # **볼드체**
-        r"__(.*?)__",      # __이탤릭체__
-        r"~~(.*?)~~",      # ~~취소선~~
-        r"`(.*?)`",        # `코드 블록`
-        r"\[(.*?)\]\(.*?\)" # [링크 텍스트](URL)
+        r"__(.*?)__",  # __이탤릭체__
+        r"~~(.*?)~~",  # ~~취소선~~
+        r"`(.*?)`",  # `코드 블록`
+        r"\[(.*?)\]\(.*?\)",  # [링크 텍스트](URL)
     ]
     for pattern in markdown_patterns:
-        cleaned_text = re.sub(pattern, r"\1", cleaned_text)  # 태그 내용만 남기고 마크다운 기호 삭제
+        cleaned_text = re.sub(
+            pattern, r"\1", cleaned_text
+        )  # 태그 내용만 남기고 마크다운 기호 삭제
 
     return cleaned_text
 
 
+@st.cache_data(ttl=3600)  # 1시간 동안 캐싱
 def get_tourist_description(place_name):
     """
     네이버 블로그 검색 API를 사용하여 관광지 설명과 블로그 링크 가져오기
@@ -83,9 +84,13 @@ def get_tourist_description(place_name):
     url = "https://openapi.naver.com/v1/search/blog.json"
     headers = {
         "X-Naver-Client-Id": NAVER_CLIENT_ID,
-        "X-Naver-Client-Secret": NAVER_CLIENT_SECRET
+        "X-Naver-Client-Secret": NAVER_CLIENT_SECRET,
     }
-    params = {"query": place_name, "display": 1, "sort": "sim"}  # 관련성 높은 블로그 1개 검색
+    params = {
+        "query": place_name,
+        "display": 1,
+        "sort": "sim",
+    }  # 관련성 높은 블로그 1개 검색
 
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
@@ -98,6 +103,7 @@ def get_tourist_description(place_name):
     return "❌ 관련 블로그 설명을 찾을 수 없습니다.", None
 
 
+@st.cache_data(ttl=3600)  # 1시간 동안 캐싱
 def get_coordinates_from_address(address):
     """
     카카오 주소 검색 API를 사용하여 주소를 위도, 경도로 변환하는 함수
@@ -106,14 +112,11 @@ def get_coordinates_from_address(address):
     headers = {"Authorization": f"KakaoAK {KAKAO_API_KEY}"}
     params = {"query": address}
 
-
-
     response = requests.get(url, headers=headers, params=params)
-    
+
     if response.status_code == 200:
         data = response.json()
 
-        
         if data["documents"]:
             x = data["documents"][0]["x"]  # 경도 (longitude)
             y = data["documents"][0]["y"]  # 위도 (latitude)
@@ -121,6 +124,7 @@ def get_coordinates_from_address(address):
 
 
 ################################################
+@st.cache_data(ttl=3600)  # 1시간 동안 캐싱
 def search_tourist_spots(query, region, display=10):
     """
     카카오 키워드 검색 API를 사용하여 지역 내 관광지를 검색
@@ -136,7 +140,8 @@ def search_tourist_spots(query, region, display=10):
     else:
         st.error(f"❌ API 요청 실패: {response.status_code}, {response.text}")
         return []
-    
+
+
 def search_hotels(region, display=10):
     """
     카카오 키워드 검색 API를 사용하여 지역 내 호텔을 검색
@@ -152,15 +157,34 @@ def search_hotels(region, display=10):
     else:
         st.error(f"❌ 호텔 정보 API 요청 실패: {response.status_code}, {response.text}")
         return []
-    
+
+
 ################################################
+
 
 def filter_tourist_spots(places):
     """
     검색된 관광지 목록에서 유의미한 장소만 필터링
     """
-    tourist_keywords = ["관광", "명소", "유적지", "문화재", "전망대", "박물관", "테마파크", "공원"]
-    return [place for place in places if any(keyword in place.get("category_group_name", "") for keyword in tourist_keywords)]
+    tourist_keywords = [
+        "관광",
+        "명소",
+        "유적지",
+        "문화재",
+        "전망대",
+        "박물관",
+        "테마파크",
+        "공원",
+    ]
+    return [
+        place
+        for place in places
+        if any(
+            keyword in place.get("category_group_name", "")
+            for keyword in tourist_keywords
+        )
+    ]
+
 
 def filter_hotel(places):
     """
@@ -169,9 +193,15 @@ def filter_hotel(places):
     hotel_keywords = ["호텔", "숙소", "펜션", "리조트"]
 
     return [
-        place for place in places
-        if any(keyword in (place.get("category_group_name", "") + place.get("place_name", "")) for keyword in hotel_keywords)
+        place
+        for place in places
+        if any(
+            keyword
+            in (place.get("category_group_name", "") + place.get("place_name", ""))
+            for keyword in hotel_keywords
+        )
     ]
+
 
 ################################################
 
@@ -184,11 +214,15 @@ def generate_kakao_map(places, hotels, selected_location=None):
         return None
 
     # ✅ 지도 중심 좌표 설정
-    selected_lat, selected_lng = get_coordinates_from_address(selected_location) if selected_location else (None, None)
+    selected_lat, selected_lng = (
+        get_coordinates_from_address(selected_location)
+        if selected_location
+        else (None, None)
+    )
     if selected_lat and selected_lng:
         center_lat, center_lng = selected_lat, selected_lng
     elif places:
-        center_lat, center_lng = places[0]['y'], places[0]['x']
+        center_lat, center_lng = places[0]["y"], places[0]["x"]
     else:
         center_lat, center_lng = 37.5665, 126.9780  # 기본값 (서울)
 
@@ -289,12 +323,6 @@ def generate_kakao_map(places, hotels, selected_location=None):
     return map_html
 
 
-
-
-
-
-
-
 # ✅ 관광지 정보 조회 실행 함수
 def run_tourist_spots():
     st.title("🌍 관광지 정보 조회")
@@ -313,37 +341,44 @@ def run_tourist_spots():
         st.session_state["year"] = year
         st.session_state["month"] = month
 
-
     # 🔹 위치 정보가 없는 경우 → 경고 메시지 출력 후 종료
     if selected_location == "위치 정보 없음" or not selected_country:
-        st.warning(""" 해당 메뉴에서는 선택한 외국인 관광객, 여행 날짜, 여행 지역 정보를 바탕으로 여행 일정을 계획할 수 있습니다.  
+        st.warning(
+            """ 해당 메뉴에서는 선택한 외국인 관광객, 여행 날짜, 여행 지역 정보를 바탕으로 여행 일정을 계획할 수 있습니다.  
                    ❌ 현재 설정된 외국인 관광객 및 여행 정보가 없습니다.❌  
-                   Country 메뉴에서부터 시작해주세요.😉""")
+                   Country 메뉴에서부터 시작해주세요.😉"""
+        )
         if st.button("➡ Country 메뉴로 이동"):
             navigate_to("Country")
         return
-    
+
     province, city = extract_region(selected_location)  # ✅ 도, 시 정보 추출
-    
+
     # 🔹 선택된 정보 출력
     language = info.get("언어", "알 수 없음")
     travel_preference = info.get("여행 성향", "알 수 없음")
 
-    st.write(f"""📅 선택한 날짜: {year}년 {month}월  
+    st.write(
+        f"""📅 선택한 날짜: {year}년 {month}월  
             🌍 선택한 국가: {selected_country}  
             🗣 언어: {language}  
             🏝 여행 성향: {travel_preference} * **여행 성향 분석은 예시 입니다.**  
             👥 입국 예상 인원: {expected_visitors:,} 명  
             🎉 선택 테마: {selected_travel}  
-            📍 테마 지역: {selected_location}""")
+            📍 테마 지역: {selected_location}"""
+    )
 
     # 🔹 위치 정보가 없을 경우 → 경고 메시지 출력 후 종료
     if not province and not city:
-        st.warning("""❌ 입력하신 위치정보로 검색에 실패했습니다.  
-                   해당 앱은 '도 + 시/군' 또는 '광역시' 정보로만 검색 가능합니다.""")
+        st.warning(
+            """❌ 입력하신 위치정보로 검색에 실패했습니다.  
+                   해당 앱은 '도 + 시/군' 또는 '광역시' 정보로만 검색 가능합니다."""
+        )
         return
     if not year:
-        st.warning("❌ 날짜 선택이 되지 않았어요. 이전 메뉴에서 날짜를 선택하면 해당 지역 관광지를 알려드립니다.")
+        st.warning(
+            "❌ 날짜 선택이 되지 않았어요. 이전 메뉴에서 날짜를 선택하면 해당 지역 관광지를 알려드립니다."
+        )
         return
 
     # 🔹 관광지 검색
@@ -358,8 +393,8 @@ def run_tourist_spots():
     if "selected_places" not in st.session_state:
         st.session_state.selected_places = set()
 
-#######3시작
-    
+    #######3시작
+
     # ✅ 검색 결과 출력
     success_box_html = f"""
         <div style="
@@ -380,19 +415,17 @@ def run_tourist_spots():
 
     st.markdown(success_box_html, unsafe_allow_html=True)
 
-
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-    # ✅ 카카오 지도 HTML 직접 생성
+    # ✅ 카카오 지도 HTML 생성
     map_html = generate_kakao_map(tourist_spots, hotels)
 
-    # ✅ HTML 파일을 저장하지 않고, 바로 렌더링
+    # 렌더링
     if map_html:
         st.components.v1.html(map_html, height=500)
     else:
         st.error("❌ 지도 HTML을 생성하는 데 실패했습니다.")
 
-        
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
 
@@ -411,29 +444,37 @@ def run_tourist_spots():
                     place_address = place["road_address_name"] or place["address_name"]
                     place_category = place["category_name"]
                     place_map_url = f"https://map.kakao.com/link/map/{place['id']}"
-                    
+
                     with st.expander(f"📍 {place['place_name']} (자세히 보기)"):
 
-                                # ✅ 관광지 설명과 블로그 링크 가져오기
+                        # ✅ 관광지 설명과 블로그 링크 가져오기
                         description, blog_url = get_tourist_description(place_name)
                         st.write(f"📍 **주소:** {place_address}")
                         if place.get("phone"):
                             st.write(f"📞 **전화번호:** {place['phone']}")
                         st.write(f"🏷 **카테고리:** {place_category}")
-                        st.write(f"📝 **설명:** {description}"
-                        )
+                        st.write(f"📝 **설명:** {description}")
                         if blog_url:
-                            st.markdown(f"[📖 네이버 블로그 리뷰 보기]({blog_url})", unsafe_allow_html=True)
-                        st.markdown(f"[📍 카카오 지도에서 보기]({place_map_url})", unsafe_allow_html=True)
-                        #체크박스
+                            st.markdown(
+                                f"[📖 네이버 블로그 리뷰 보기]({blog_url})",
+                                unsafe_allow_html=True,
+                            )
+                        st.markdown(
+                            f"[📍 카카오 지도에서 보기]({place_map_url})",
+                            unsafe_allow_html=True,
+                        )
+                        # 체크박스
                         key = f"tourist_{place['id']}"
-                        selected = st.checkbox(f"{place['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
+                        selected = st.checkbox(
+                            f"{place['place_name']} 여행일정에 추가하기!",
+                            value=(key in st.session_state.selected_places),
+                        )
 
                         if selected and key not in st.session_state.selected_places:
                             st.session_state.selected_places.add(place_name)
                         elif not selected and key in st.session_state.selected_places:
                             st.session_state.selected_places.discard(place_name)
-                        
+
             else:
                 st.warning("🔍 해당 지역에서 관광지를 찾을 수 없습니다.")
 
@@ -442,14 +483,22 @@ def run_tourist_spots():
             if hotels:
                 for hotel in hotels:
                     with st.expander(f"🏨 {hotel['place_name']} (자세히 보기)"):
-                        st.write(f"📍 **주소:** {hotel['road_address_name'] or hotel['address_name']}")
+                        st.write(
+                            f"📍 **주소:** {hotel['road_address_name'] or hotel['address_name']}"
+                        )
                         if hotel.get("phone"):
                             st.write(f"📞 **전화번호:** {hotel['phone']}")
                         map_url = f"https://map.kakao.com/link/map/{hotel['id']}"
-                        st.markdown(f"[📍 카카오 지도에서 보기]({map_url})", unsafe_allow_html=True)
-                                                #체크박스
+                        st.markdown(
+                            f"[📍 카카오 지도에서 보기]({map_url})",
+                            unsafe_allow_html=True,
+                        )
+                        # 체크박스
                         key = f"hotel_{hotel['id']}"
-                        selected = st.checkbox(f"{hotel['place_name']} 여행일정에 추가하기!", value=(key in st.session_state.selected_places))
+                        selected = st.checkbox(
+                            f"{hotel['place_name']} 여행일정에 추가하기!",
+                            value=(key in st.session_state.selected_places),
+                        )
                         if selected and key not in st.session_state.selected_places:
                             st.session_state.selected_places.add(place_name)
                         elif not selected and key in st.session_state.selected_places:
@@ -467,15 +516,15 @@ def run_tourist_spots():
         st.subheader("✅ 선택한 관광지 & 숙소 목록")
 
         if st.session_state.selected_places:
-            selected_list = list(st.session_state.selected_places)  # ✅ set을 리스트로 변환
+            selected_list = list(
+                st.session_state.selected_places
+            )  # ✅ set을 리스트로 변환
             for place_name in st.session_state.selected_places:
                 st.write(f"✔️ {place_name}")
 
             # ✅ LLM 여행 패키지 생성 버튼 (submit 후에만 나타남)
             if st.button("➡ AI와 함께 여행 패키지 만들기"):
                 navigate_to("AI PLANNER")
-        
+
         else:
             st.write("❌ 아직 선택된 관광지 & 숙소가 없습니다.")
-
-

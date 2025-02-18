@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 st.set_page_config(
     layout="wide",
     page_title="25,26년 해외관광객 대상 축제와 함께하는 여행 패키지 가이드",
-    page_icon="🌍"
+    page_icon="🌍",
 )
 
 # ✅ 초기 페이지 설정
@@ -35,6 +35,7 @@ page_mapping = {
     "About": run_about,
 }
 
+
 def main():
     menu = {
         "Home": "홈",
@@ -47,18 +48,36 @@ def main():
     }
 
     with st.sidebar:
-        default_index = list(menu.keys()).index(st.session_state["current_page"]) if st.session_state["current_page"] in menu else 0
+        default_index = (
+            list(menu.keys()).index(st.session_state["current_page"])
+            if st.session_state["current_page"] in menu
+            else 0
+        )
         choice = option_menu(
-            "Menu", list(menu.keys()),
-            icons=['house', 'globe', 'calendar-event', 'cloud-sun', 'binoculars', 'bi bi-chat-dots','info-circle'],
+            "Menu",
+            list(menu.keys()),
+            icons=[
+                "house",
+                "globe",
+                "calendar-event",
+                "cloud-sun",
+                "binoculars",
+                "bi bi-chat-dots",
+                "info-circle",
+            ],
             menu_icon="app-indicator",
             default_index=default_index,
             styles={
                 "container": {"padding": "4!important", "background-color": "#fafafa"},
                 "icon": {"color": "black", "font-size": "25px"},
-                "nav-link": {"font-size": "16px", "text-align": "left", "margin": "0px", "--hover-color": "#fafafa"},
+                "nav-link": {
+                    "font-size": "16px",
+                    "text-align": "left",
+                    "margin": "0px",
+                    "--hover-color": "#fafafa",
+                },
                 "nav-link-selected": {"background-color": "#08c7b4"},
-            }
+            },
         )
 
     # ✅ 사이드바에서 선택한 메뉴에 따라 이동
@@ -66,7 +85,8 @@ def main():
         navigate_to(choice)
 
     # ✅ 현재 페이지 실행
-    page_mapping[st.session_state["current_page"]]() 
+    page_mapping[st.session_state["current_page"]]()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
