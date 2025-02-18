@@ -1,4 +1,3 @@
-import os
 import re
 from bs4 import BeautifulSoup
 import requests
@@ -177,8 +176,6 @@ def filter_hotel(places):
 ################################################
 
 
-import os
-
 def generate_kakao_map(places, hotels, selected_location=None):
     """카카오 지도 HTML 파일을 생성하고, HTTPS 환경에서도 정상적으로 작동하도록 설정"""
 
@@ -186,12 +183,8 @@ def generate_kakao_map(places, hotels, selected_location=None):
     if not selected_location:
         return None
 
-    # ✅ 축제 위치를 위도·경도로 변환
-    selected_lat, selected_lng = None, None
-    if selected_location:
-        selected_lat, selected_lng = get_coordinates_from_address(selected_location)
-
     # ✅ 지도 중심 좌표 설정
+    selected_lat, selected_lng = get_coordinates_from_address(selected_location) if selected_location else (None, None)
     if selected_lat and selected_lng:
         center_lat, center_lng = selected_lat, selected_lng
     elif places:
@@ -265,13 +258,15 @@ def generate_kakao_map(places, hotels, selected_location=None):
             hotelOverlay{idx}.setMap(map);
         """
 
-    # ✅ HTTPS 환경을 강제하는 카카오 지도 API 사용
+    # ✅ HTTPS 업그레이드 설정 추가 (Mixed Content 오류 해결)
     map_html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        
         <script type="text/javascript" 
             src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
     </head>
@@ -291,12 +286,8 @@ def generate_kakao_map(places, hotels, selected_location=None):
     </html>
     """
 
-    # ✅ HTML 파일 저장 (Streamlit이 읽을 수 있도록 설정)
-    file_path = os.path.join(os.getcwd(), "map.html")
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(map_html)
+    return map_html
 
-    return file_path  # 생성된 HTML 파일 경로 반환
 
 
 
@@ -392,17 +383,14 @@ def run_tourist_spots():
 
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-# ✅ 카카오 지도 HTML 파일 생성
-    map_file_path = generate_kakao_map(tourist_spots, hotels)
+    # ✅ 카카오 지도 HTML 직접 생성
+    map_html = generate_kakao_map(tourist_spots, hotels)
 
-    # ✅ HTML 파일을 직접 읽어서 Streamlit에서 렌더링
-    if map_file_path:
-        with open(map_file_path, "r", encoding="utf-8") as f:
-            map_html_content = f.read()
-        
-        st.components.v1.html(map_html_content, height=500)
+    # ✅ HTML 파일을 저장하지 않고, 바로 렌더링
+    if map_html:
+        st.components.v1.html(map_html, height=500)
     else:
-        st.error("❌ 지도 파일을 생성하는 데 실패했습니다.")
+        st.error("❌ 지도 HTML을 생성하는 데 실패했습니다.")
 
         
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
