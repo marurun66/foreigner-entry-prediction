@@ -296,6 +296,7 @@ def generate_kakao_map(places, hotels, selected_location=None):
 
 # ✅ 관광지 정보 조회 실행 함수
 def run_tourist_spots():
+    components.html(generate_kakao_map(places, hotels), height=500, scrolling=False)
     st.title("🌍 관광지 정보 조회")
 
     ## 🔹 이전 페이지에서 가져온 정보들
