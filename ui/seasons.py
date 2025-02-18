@@ -13,7 +13,7 @@ NAVER_SEARCH_API_URL = "https://openapi.naver.com/v1/search/blog.json"  # 블로
 
 # ✅ 공공데이터 API 키 설정
 data_go_API_KEY = st.secrets["data_go_API_KEY"]
-KEYWORD_BASE_URL = "http://apis.data.go.kr/B551011/KorService1/searchKeyword1"
+KEYWORD_BASE_URL = "https://apis.data.go.kr/B551011/KorService1/searchKeyword1"
 
 def clean_html_with_bs(text):
     """HTML 태그 및 마크다운 기호 제거"""

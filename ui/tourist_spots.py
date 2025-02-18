@@ -173,6 +173,7 @@ def filter_hotel(places):
         if any(keyword in (place.get("category_group_name", "") + place.get("place_name", "")) for keyword in hotel_keywords)
     ]
 
+################################################
 def generate_kakao_map(places,hotels,selected_location=None):
 
     selected_location = st.session_state.get("selected_location", "위치 정보 없음")
@@ -270,7 +271,8 @@ def generate_kakao_map(places,hotels,selected_location=None):
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" 
-            src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
+            src="https://ssl.daumcdn.net/dmaps/map_js_init/v3.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
+
     </head>
     <body>
         <div id="map" style="width: 100%; height: 500px;"></div>
@@ -386,7 +388,7 @@ def run_tourist_spots():
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
     map_html = generate_kakao_map(tourist_spots, hotels)
-    components.html(map_html, height=500, scrolling=False)
+    components.html(map_html, height=500, scrolling=True,allow_scripts=True, sandbox="allow-scripts allow-same-origin")
     
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
