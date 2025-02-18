@@ -42,20 +42,26 @@
     - 2022년 7월 이후부터 입국 제한이 완화되었으나 **일부 국가의 입국 제한이 지속** → **2023년~2024년 데이터로 예측**
 - **코로나 이전 패턴을 반영하기 위해 2018~2019년 데이터 추가 활용**
 - 최종적으로 **2018, 2019, 2023, 2024년 데이터 활용**
+- 유의미한 관광 수요 분석을 위해 모든 나라 대상이 아닌 **입국자 상위 15개국**으로 타겟 설정
 
 ### 📌 **데이터 분석 예측 모델 선정 과정**
 
 #### **🔹 Linear Regression (선형 회귀 분석)**
 - 원핫인코딩으로 국가별 데이터를 변환 후 예측 시도
-- **r2_score = 0.88**로 높은 성능을 보였지만, **음수 값이 발생**하는 문제가 있어 사용 어려움
+- **r2_score = 0.88**로 높은 성능을 보였지만, **계절성 반영 실패로 음수 값이 발생**하는 문제가 있어 사용 어려움
 
 #### **🔹 XGBoost 모델**
-- 초기 모델: **r2_score = 0.98**로 높은 성능이었으나, **예측값이 실제 입국자 수보다 낮게 나오는 문제** 발생
-- 해결: **'월_sin', '월_cos' 변환**을 통해 계절성 반영 → **r2_score = 0.987**로 개선
+- 초기 모델: **r2_score = 0.98**로 높은 성능이었으나, **예측값이 예년 평균 입국자 수보다 낮게 나오는 문제** 발생
+- 해결: **'월_sin', '월_cos' 변환**을 통해 **1월과 12월간의 간극**을 줄여 계절성 반영 
+    모델 파라미터(n_estimators,learning_rate,max_depth,reg_lambda) 조절로 성능 또한 **r2_score = 0.987**로 개선
 
 #### **🔹 Prophet 모델**
-- 계절성을 반영한 예측이 가능했으며, **MAPE(%) 기준 전반적으로 우수한 성능**을 보임
+- 계절성을 반영한 예측이 가능했으며, **MAPE(%) 기준 4-15%로 전반적으로 우수한 성능**을 보임
 - 단, **중국의 경우 52%의 높은 오차 발생** → **중국은 XGBoost 모델로 보완**
+
+#### **🔹 Hierarchical clustering 분류 모델**
+- 국가별 계절 선호도를 확인하고자 입국인원 스케일링, '월_sin', '월_cos'변환으로 월 간격을 줄여 진행했으나, 크게 유의미한 분석결과가 나오지 않았음
+- 계절 선호도는 전체 기간 입국자 수 대비 각 계절의 입국자 수 비율(%)로 산출
 
 ### 📌 **최종 모델 선정**
 ✅ **Prophet 모델**: 전체적으로 계절별 트렌드를 반영하여 예측 가능  
@@ -64,33 +70,22 @@
 ---
 
 ## 📡 **사용한 API 및 외부 데이터**
---**법무부_외국인 국적 및 월별 입국자 현황** "[데이터 출처: 공공데이터포털](https://www.data.go.kr/data/3074937/fileData.do)"
+- **법무부_외국인 국적 및 월별 입국자 현황** "[데이터 출처: 공공데이터포털](https://www.data.go.kr/data/3074937/fileData.do)"
 - **한국관광공사 API** ([데이터 출처](https://www.data.go.kr/data/15101578/openapi.do#/API))
 - **네이버 블로그 검색 API** ([블로그 검색](https://openapi.naver.com/v1/search/blog.json))
 - **카카오 맵 API** ([지도 서비스](https://developers.kakao.com/console/app/1196178/config/platform))
-- **gemma-2-9b-it LLM**
+- **gemma-2-9b-it LLM** ([허깅페이스](https://huggingface.co/google/gemma-2-9b-it)))
 ---
 
-## 💻 **설치 및 실행 방법**
-```bash
-# 프로젝트 클론
-git clone https://github.com/your-repo/tourism-ai.git
-cd tourism-ai
-
-# 가상환경 생성 및 패키지 설치
-python -m venv venv
-source venv/bin/activate  # Mac/Linux
-venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-
-# Streamlit 실행
-streamlit run app.py
-```
+## 🚀 **Streamlit 배포**
+로컬 환경에서 앱 테스트 후 requirements.txt를 생성하여 필요한 라이브러리 목록을 관리  
+GitHub에 애플리케이션를 업로드  
+Streamlit Share를 활용하여 외부에서 접속 가능하도록 서비스화  
 
 ---
 
 ## 📞 **문의**
-- Email: example@email.com
+- Email: marurun66@gmail.com
 ---
 
 🎉 **AI 기반 국가별 입국자 예측 & 맞춤 여행 서비스로 더 나은 여행 기획을 경험하세요!** 🚀
