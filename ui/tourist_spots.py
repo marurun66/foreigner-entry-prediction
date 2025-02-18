@@ -272,7 +272,6 @@ def generate_kakao_map(places,hotels,selected_location=None):
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" 
             src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services"></script>
-
     </head>
     <body>
         <div id="map" style="width: 100%; height: 500px;"></div>
