@@ -301,8 +301,7 @@ def run_tourist_spots():
 
 
     st.title("🌍 관광지 정보 조회")
-    map_html = generate_kakao_map(places, hotels)
-    components.html(generate_kakao_map(places, hotels), height=500, scrolling=False)
+    
 
     ## 🔹 이전 페이지에서 가져온 정보들
     year = st.session_state.get("year")
@@ -388,8 +387,8 @@ def run_tourist_spots():
 
     # 🔹 카카오 지도 표시
     st.subheader("🗺 카카오 지도에서 관광지 & 숙소 확인")
-    map_html = generate_kakao_map(tourist_spots, hotels)
-    components.html(map_html, height=500, scrolling=False)
+    map_html = generate_kakao_map(places, hotels)
+    components.html(generate_kakao_map(places, hotels), height=500, scrolling=False)
     
     # 🔹 관광지와 숙소를 2개 컬럼으로 표시
     st.subheader("📌 여행일정에 추가하고싶은 관광지 및 숙소를 선택하세요.")
