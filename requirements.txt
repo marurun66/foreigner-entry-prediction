@@ -8,3 +8,4 @@ huggingface_hub
 xmltodict
 streamlit-option-menu
 streamlit-aggrid
+components
