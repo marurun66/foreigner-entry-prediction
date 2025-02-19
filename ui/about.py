@@ -174,6 +174,7 @@ def run_about():
     코드 개발 및 테스트
     **session_state**를 활용하여 유저가 입력한 정보를 유지하고, **navigate_to** 함수를 활용하여 페이지 이동 구현
     카카오맵 API에 접근 가능하도록 로컬 주소를 허용된 도메인으로 등록
+    빠른 API처리를 위해 @st.cache_data(ttl=3600) 캐싱 처리
     2. 스트림릿 배포:  
     **requirements.txt**으로 필요한 라이브러리 목록 관리
     GitHub에 최종 푸쉬 후 스트림릿에 연동

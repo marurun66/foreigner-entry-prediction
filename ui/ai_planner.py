@@ -80,6 +80,7 @@ def save_travel_plan_to_csv(travel_plan, filename):
 
 def run_ai_planner():
     """AI 여행 플래너 실행"""
+    st.title("🤖 AI 여행 플래너")
     user_selection = get_user_selection()
 
     # ✅ 선택된 관광지가 없을 경우 안내 메시지 출력 후 종료
@@ -92,7 +93,7 @@ def run_ai_planner():
             navigate_to("Country")
         return
 
-    st.title("🤖 AI 여행 플래너")
+
     st.write(
         """
     ✨ AI가 선택한 정보를 기반으로 맞춤형 여행 일정을 생성합니다.  

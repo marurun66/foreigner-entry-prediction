@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from navigation import navigate_to  # ✅ `navigate_to()`를 별도 파일에서 가져옴
-
+from navigation import navigate_to
 from ui.about import run_about
 from ui.ai_planner import run_ai_planner
 from ui.country import run_country
@@ -20,11 +19,51 @@ st.set_page_config(
     page_icon="🌍",
 )
 
-# ✅ 초기 페이지 설정
+# JavaScript 코드 수정
+st.markdown("""
+<script>
+const sidebarMenu = window.parent.document.querySelector('.stSidebar');
+if (sidebarMenu) {
+    sidebarMenu.addEventListener('click', () => {
+        setTimeout(() => {
+            window.parent.scrollTo(0, 0);
+        }, 100);
+    });
+}
+
+const tabs = window.parent.document.querySelectorAll('.stTabs [data-baseweb="tab-list"] [role="tab"]')
+const tabPanels = window.parent.document.querySelectorAll('.stTabs [data-baseweb="tab-panel"]')
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    setTimeout(() => {
+      window.parent.scrollTo(0, 0)
+    }, 100)
+  })
+})
+</script>
+""", unsafe_allow_html=True)
+
+# CSS 스타일 추가
+st.markdown("""
+<style>
+.stTabs [data-baseweb="tab-list"] {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1000;
+}
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# 초기 페이지 설정
 if "current_page" not in st.session_state:
     st.session_state["current_page"] = "Home"
 
-# ✅ 페이지 실행 함수 매핑
+# 페이지 실행 함수 매핑
 page_mapping = {
     "Home": run_home,
     "Country": run_country,
@@ -34,7 +73,6 @@ page_mapping = {
     "AI PLANNER": run_ai_planner,
     "About": run_about,
 }
-
 
 def main():
     menu = {
@@ -80,13 +118,14 @@ def main():
             },
         )
 
-    # ✅ 사이드바에서 선택한 메뉴에 따라 이동
+    # 사이드바에서 선택한 메뉴에 따라 이동
     if choice != st.session_state["current_page"]:
         navigate_to(choice)
+        st.experimental_set_query_params()  # URL 파라미터 초기화
+        st.experimental_rerun()  # 페이지 재실행
 
-    # ✅ 현재 페이지 실행
+    # 현재 페이지 실행
     page_mapping[st.session_state["current_page"]]()
-
 
 if __name__ == "__main__":
     main()
