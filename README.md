@@ -86,6 +86,7 @@
 - **requirements.txt**으로 필요한 라이브러리 목록 관리
 - GitHub에 최종 푸쉬 후 스트림릿에 연동
 - 카카오맵 API에 접근 가능하도록 앱 주소를 허용된 도메인으로 변경
+- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 로 Mixed Content 문제 해결
 
 ---
 
