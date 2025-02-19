@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 st.set_page_config(
     layout="wide",
-    page_title="25,26년 해외관광객 대상 축제와 함께하는 여행 패키지 가이드",
+    page_title="사계절 축제와 함께하는 여행 패키지 가이드",
     page_icon="🌍",
 )
 
