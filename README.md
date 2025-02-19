@@ -1,4 +1,5 @@
-# 📌 AI 기반 국가별 입국자 예측 및 맞춤 여행 서비스
+# 📌 AI 기반 국가별 입국자 예측 및 맞춤 여행 서비스  
+[StreamlitAPP](https://foreigner-entry-prediction-marurun66.streamlit.app/)
 
 ## 🌍 프로젝트 개요
 **AI 모델을 활용한 국가별 입국자 예측 및 맞춤 여행 기획 서비스**입니다.  
