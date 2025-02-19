@@ -109,10 +109,7 @@ def run_about():
         )
     with col2:
         st.image("image/linear.png", width=500)
-
-    df = pd.read_csv("data/evaluation_df.csv")
-    st.dataframe(df, use_container_width=True)
-    st.image("image/prophet.png", use_container_width=True)
+    st.markdown("---")
     st.markdown(
         """
     ### 2. **Prophet** 모델 적용 :  
@@ -121,9 +118,13 @@ def run_about():
     )
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.image("image/xgb1.png", use_container_width=True)
+        df = pd.read_csv("data/evaluation_df.csv")
+        st.dataframe(df, width=600)
     with col2:
-        st.image("image/xgb2.png", use_container_width=True)
+        st.image("image/prophet.png", use_container_width=True)
+
+
+    st.markdown("---")
     st.markdown(
         """
     ### 3. **XGBoost** 모델 적용(r2_score=0.98) :  
@@ -132,6 +133,17 @@ def run_about():
 
     """
     )
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.image("image/xgb1.png", use_container_width=True)
+    with col2:
+        st.image("image/xgb2.png", use_container_width=True)
+    st.markdown("---")
+    st.subheader("📌 최종 모델 선정-스위칭 기반 하이브리드 모델")
+    st.markdown("""
+✅ Prophet 모델: 전체적으로 계절별 트렌드를 반영하여 예측 가능한 모델, 대부분의 국가에 적용   
+✅ XGBoost 모델: 코로나 회복 영향이 큰 국가의 경우 별도로 적용, 중국의 경우에만 적용
+                """)
     st.markdown(
         """
     <hr style="border: 1px solid gray; margin-top: 20px; margin-bottom: 20px;">
