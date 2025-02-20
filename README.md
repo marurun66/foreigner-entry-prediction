@@ -77,7 +77,7 @@
 - **카카오 맵 API** ([지도 서비스](https://developers.kakao.com/console/app/1196178/config/platform))
 - **gemma-2-9b-it LLM** ([허깅페이스](https://huggingface.co/google/gemma-2-9b-it)))
 ---
-## **프롬프트 설정**
+## **유저가 선택한 정보를 토대로 LLM에게 명확한 지시를 내리는 프롬프트 작성**
     prompt = """
     나는 한국 여행사의 직원입니다. 
     {year}년 {month}월 {selected_country} 손님을 위한 한국{selected_location} 여행 코스를 준비해야 합니다. 
