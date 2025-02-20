@@ -60,7 +60,7 @@ def generate_ai_travel_plan(user_selection):
     나는 한국 여행사의 직원입니다. 
     {year}년 {month}월 {selected_country} 손님을 위한 한국{selected_location} 여행 코스를 준비해야 합니다. 
     {language} 언어를 사용하는 {selected_country} 손님을 위해 사전에 준비하면 좋을 것이 무엇인지 알려주세요.
-
+    이동은 우리 여행사 제공 버스로 이동합니다.
     이번 여행은 {selected_travel}를 중심으로 진행되며, 주요 방문지는 다음과 같습니다.
 
     ### 1. 숙박지 (호텔/펜션/리조트)
@@ -78,7 +78,7 @@ def generate_ai_travel_plan(user_selection):
 
     한글로 작성해주세요.
     """
-    messages = [{"role": "user", "content": prompt}]
+    messages = [{"role": "user", "content": prompt},{"role":"system","content":"당신은 여행 전문가입니다. 한글로, 꼼꼼하게 작성해주세요."}]
     completion = client.chat.completions.create(
         model="google/gemma-2-9b-it",
         messages=messages,
