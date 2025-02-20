@@ -77,7 +77,30 @@
 - **카카오 맵 API** ([지도 서비스](https://developers.kakao.com/console/app/1196178/config/platform))
 - **gemma-2-9b-it LLM** ([허깅페이스](https://huggingface.co/google/gemma-2-9b-it)))
 ---
+## **프롬프트 설정**
+    prompt = """
+    나는 한국 여행사의 직원입니다. 
+    {year}년 {month}월 {selected_country} 손님을 위한 한국{selected_location} 여행 코스를 준비해야 합니다. 
+    {language} 언어를 사용하는 {selected_country} 손님을 위해 사전에 준비하면 좋을 것이 무엇인지 알려주세요.
 
+    이번 여행은 {selected_travel}를 중심으로 진행되며, 주요 방문지는 다음과 같습니다.
+
+    ### 1. 숙박지 (호텔/펜션/리조트)
+    다음 장소에서 숙박이 이루어집니다.
+    - {", ".join([f"{hotel} ({category})" for hotel, category in selected_hotels.items()])}
+
+    ### 2. 관광지
+    다음 관광지를 방문할 예정입니다. 각 장소의 매력과 해당 국가 고객에게 어필할 만한 포인트를 설명해주세요.
+
+    - {", ".join([f"{spot} ({category})" for spot, category in user_selection["selected_tourist_spots"].items()])}
+
+
+    고객이 한국에 입국해서 {selected_location}의 관광지를 둘러보고, 귀국하는 전체 여행 일정을 작성해주세요.
+    또한, {travel_preference} 성향의 {selected_country} 고객에게 이 여행에서 어떤 부분이 어필될지도 작성해주세요.
+
+    한글로 작성해주세요.
+    """
+---
 ## 🚀 **Streamlit 배포**
 1. **로컬 컴퓨터 작업:**  
 - 코드 개발 및 테스트
