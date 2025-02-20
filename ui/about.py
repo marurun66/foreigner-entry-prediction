@@ -156,7 +156,7 @@ def run_about():
     **채택한 LLM** : google/gemma-2-9b-it  
     **API 형태** 로 제공: 별도의 학습 과정 없이 즉시 활용 가능  
     **사용자의 입력 정보** 를 종합적으로 분석하여 여행사 수준의 맞춤형 여행 계획을 자동 생성하는 데 최적화된것으로 판단하여 선정      
-    **LLM이 처리하도록 세팅한 프롬프트** :             
+    **유저가 선택한 정보를 토대로 LLM에게 명확한 지시를 내리는 프롬프트 작성** :             
     """
     )
     prompt = """
@@ -180,6 +180,8 @@ def run_about():
     또한, {travel_preference} 성향의 {selected_country} 고객에게 이 여행에서 어떤 부분이 어필될지도 작성해주세요.
 
     한글로 작성해주세요.
+
+    messages = [{"role": "user", "content": prompt},{"role":"system","content":"당신은 여행 전문가입니다. 한글로, 꼼꼼하게 작성해주세요."}]
     """
 
     st.code(prompt, language="python")
