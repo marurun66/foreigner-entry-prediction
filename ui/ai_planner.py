@@ -78,15 +78,24 @@ def generate_ai_travel_plan(user_selection):
 
     한글로 작성해주세요.
     """
-    messages = [{"role": "user", "content": prompt},{"role":"system","content":"당신은 여행 전문가입니다. 한글로, 꼼꼼하게 작성해주세요."}]
-    completion = client.chat.completions.create(
-        model="google/gemma-2-9b-it",
-        messages=messages,
-        max_tokens=1024,
-    )
-    print(prompt)
+    messages = [
+        {"role": "user", "content": prompt},
+        {"role": "system", "content": "당신은 여행 전문가입니다. 한글로, 꼼꼼하게 작성해주세요."},
+    ]
 
-    return completion.choices[0].message["content"]
+    try:
+        completion = client.chat.completions.create(
+            model="google/gemma-2-9b-it",
+            messages=messages,
+            max_tokens=1024,
+        )
+        return completion.choices[0].message["content"]
+    
+    except Exception as e:
+        # 스트림릿에 경고 메시지 출력
+        st.warning("⚠️ AI 여행 일정을 생성하는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.")
+        print(f"[ERROR] AI 호출 실패: {e}")
+        return None
 
 
 def save_travel_plan_to_csv(travel_plan, filename):
@@ -147,6 +156,9 @@ def run_ai_planner():
         ):
             # ✅ 세션 초기화 플래그 설정
             st.session_state["reset"] = True
+
+        else:
+            st.info("AI 일정 생성이 실패했기 때문에 다운로드는 불가능합니다. 😢")
 
     # ✅ 세션 초기화 감지 후 실행
     if st.session_state.get("reset"):
